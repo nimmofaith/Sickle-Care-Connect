@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="sickle.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+    <img src= "images/sicklecare logo.jpeg"alt="Logo" width="300px" height="110px">
+        </div>
+
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html" class="link">Home</a></li>
+
+            <!--about SCD-->
+            <li class="nav-items dropdown">
+                <span class="link dropdown-toggle">About SCD ▾</span>
+
+                <ul class="dropdown-menu">
+                    <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                    <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                    <li><a href="causes.html" class="link">Causes</a></li>
+                    <li><a href="treatment.html" class="link">Treatment</a></li>
+                </ul>
+            </li>
+            <li><a href="findcare2.html" class="link">Find Care</a></li>
+           <li> <a href="sign in.html" class="btn">Sign in</a></li>
+
+        
+        </ul>
+    </nav>
+    </header>
+    <!--main content-->
+        <main style="padding: 20px; max-width: 900px; margin:auto;">
+             <h1>🩸 Symptoms of Sickle Cell Disease</h1>
+            <p>Sickle Cell Disease (SCD) can cause a wide range of symptoms that vary in severity and frequency among individuals. The symptoms are primarily due to the abnormal shape of the red blood cells, which can lead to blockages in blood flow and damage to organs. Common symptoms of SCD include:</p>
+            <ul>    
+                <li><strong>Anemia:</strong> The sickle-shaped red blood cells have a shorter lifespan than normal red blood cells, leading to a constant shortage of red blood cells (anemia). This can cause fatigue, weakness, and pale skin.</li>
+                <li><strong>Pain Episodes (Vaso-occlusive Crises):</strong> One of the hallmark symptoms of SCD is sudden episodes of severe pain, often in the chest, abdomen, joints, and bones. These pain episodes occur when sickled cells block blood flow to certain areas of the body.</li>
+                <li><strong>Swelling:</strong> Swelling in the hands and feet can occur due to blocked blood flow and inflammation.</li>
+                <li><strong>Frequent Infections:</strong> Individuals with SCD are more susceptible to infections due to damage to the spleen, which plays a crucial role in fighting infections.</li>
+                <li><strong>Delayed Growth and Puberty:</strong> Children with SCD may experience delayed growth and puberty due to chronic anemia and other complications.</li>
+                <li><strong>Vision Problems:</strong> Blockages in the small blood vessels of the eyes can lead to vision problems and even blindness in severe cases.</li>
+                <li><strong>Organ Damage:</strong> Over time, the repeated blockages and lack of oxygen can cause damage to organs such as the liver, kidneys, lungs, and heart.</li>
+            </ul>
+            <p>It's important to note that the severity and frequency of symptoms can vary widely among individuals with SCD. Some people may experience mild symptoms, while others may have more severe complications. Regular medical care and management are essential for individuals with SCD to help manage symptoms and prevent complications.</p>
+            <p>Symptoms can appear in childhood or early infancy and may worsen over time. Regular medical care is essential to manage these symptoms and prevent complications.</p>
+        </main>
+    <!--js-->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    dropdownToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+        dropdownMenu.style.display = 'none';
+    });
+});
+</script>
+     
+</body>
+</html>

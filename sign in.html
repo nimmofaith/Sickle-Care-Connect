@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sickle Care Connect</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="sickle.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+   <header class="navbar">
+    <img src= "images/sicklecare logo.jpeg"alt="Logo" width="300px" height="110px">
+        
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html" class="link">Home</a></li>
+
+            <!--about SCD-->
+            <li class="nav-items dropdown">
+                <span class="link dropdown-toggle">About SCD ▾</span>
+
+                <ul class="dropdown-menu">
+                    <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                    <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                    <li><a href="causes.html" class="link">Causes</a></li>
+                    <li><a href="treatment.html" class="link">Treatment</a></li>
+                </ul>
+            </li>
+            <li><a href="findcare2.html" class="link">Find Care</a></li>
+           <li> <a href="sign in.html" class="btn">Sign in</a></li>
+
+        
+        </ul>
+    </nav>
+    </header> 
+
+    <!--js-->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    dropdownToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+        dropdownMenu.style.display = 'none';
+    });
+});
+</script>
+    <div class="signin-container">
+    <form class="signin-form">
+      <h2>Create Account</h2>
+
+      <input type="text" placeholder="Full Name" required>
+      <input type="email" placeholder="Email Address" required>
+      <input type="password" placeholder="Password" required>
+      <input type="password" placeholder="Confirm Password" required>
+
+      <button type="submit">Sign Up</button>
+
+      <p class="login-text">
+        Already have an account? <a href="login.html">Login</a>
+      </p>
+    </form>
+  </div>
+</body>
+</html>
