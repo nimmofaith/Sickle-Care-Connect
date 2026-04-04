@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sickle Care Connect</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+   <header class="navbar">
+    <img src= "images/sicklecare logo.jpeg"alt="Logo" width="300px" height="110px">
+        
+    </div>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="index.html" class="link">Home</a></li>
+
+            <!--about SCD-->
+            <li class="nav-items dropdown">
+                <span class="link dropdown-toggle">About SCD ▾</span>
+
+                <ul class="dropdown-menu">
+                    <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                    <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                    <li><a href="causes.html" class="link">Causes</a></li>
+                    <li><a href="treatment.html" class="link">Treatment</a></li>
+                </ul>
+            </li>
+            <li><a href="findcare2.html" class="link">Find Care</a></li>
+           <li> <a href="sign in.html" class="btn">Sign in</a></li>
+
+        
+        </ul>
+    </nav>
+    </header> 
+
+    <!--js-->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    dropdownToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function() {
+        dropdownMenu.style.display = 'none';
+    });
+});
+</script>
+<!Doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sickle Cell Awareness</title>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <style> 
+            body 
+            { font-family: Arial,
+                 sans-serif;
+                  line-height: 1.6; 
+                  margin: 2rem; background-color:
+                   #f9f9f9; color: #333; } 
+                   article { max-width: 800px; margin: auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }h1, h2 { color: #2c3e50; } p { margin-bottom: 1rem; }
+                 .like-container {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 24px;
+}
+
+.like-container i {
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.like-container i.liked {
+  color: red; /* heart turns red when clicked */
+}
+
+.like-count {
+  margin-left: 8px;
+  font-size: 20px;
+  vertical-align: middle;
+}
+</style>
+    </head>
+    <body>
+        <article>
+    <hr><h1 style="color:#800000;text-align:center;"> Sickle Cell Awareness</h1>
+    <div class="like-container">
+  <i id="heartIcon" class="fa-regular fa-heart"></i>
+  <span id="likeCount" class="like-count">0</span>
+  <i id="saveIcon" class="fa-regular fa-bookmark" style="margin-left:15px;"></i>
+</div>
+    <hr>
+<img src="images/awareness article2.jpeg" alt="Awareness Image" style="width:500px; height:300px; display:block; margin:0 auto; border-radius:6px;">
+
+        <p> Sickle cell disease often remains unseen until a crisis occurs. Many children and adults living with the condition appear healthy most of the time, yet silently face risks that can become life-threatening without warning. Pain episodes, severe infections, and organ damage can develop suddenly, especially when the disease is not well managed. This is why early diagnosis and consistent care are essential. When sickle cell is identified early, complications can be prevented, controlled, or reduced significantly.</p>
+        <p>Sickle cell disease is a genetic condition passed from parents to their children. A child develops the disease when both parents carry the sickle cell trait. In Kenya, many people carry the trait without knowing it. Newborn screening, early testing, and knowing one’s sickle cell status help families make informed decisions and ensure timely medical care.</p>
+        <p>Children diagnosed early can receive lifesaving interventions, including routine check-ups, preventive medications, and vaccinations. Adolescents and adults benefit from regular follow-up, education on avoiding triggers, and prompt treatment when symptoms arise. Sickle cell care services are available in public hospitals and specialized clinics across the country, though awareness remains the first step to access.</p>
+        <p>Preventing severe sickle cell complications does not start in crisis.<br>
+        It starts with knowing your status.<br>
+        It starts with early testing.<br>
+        It starts with consistent care</p>
+        <p>This Sickle Cell Awareness Month, let’s stand with those living with sickle cell, support early diagnosis, and choose informed action for healthier families and stronger communities. </p>
+      <script>
+  // Simulated sign-in state (replace with real logic later)
+  let isSignedIn = false; // set to true when user signs in
+
+  // Heart (like) logic
+  const heartIcon = document.getElementById('heartIcon');
+  const likeCount = document.getElementById('likeCount');
+
+  let count = parseInt(localStorage.getItem('likeCount')) || 0;
+  let liked = localStorage.getItem('liked') === 'true';
+
+  likeCount.textContent = count;
+  if (liked) {
+    heartIcon.classList.remove('fa-regular');
+    heartIcon.classList.add('fa-solid', 'liked');
+    heartIcon.style.color = "red";
+  }
+
+  heartIcon.addEventListener('click', () => {
+    if (!isSignedIn) {
+      alert("You need to sign in to like.");
+      return;
+    }
+    if (liked) {
+      alert("You can only like once.");
+      return;
+    }
+    heartIcon.classList.remove('fa-regular');
+    heartIcon.classList.add('fa-solid', 'liked');
+    heartIcon.style.color = "red";
+    liked = true;
+    count++;
+    likeCount.textContent = count;
+    localStorage.setItem('likeCount', count);
+    localStorage.setItem('liked', liked);
+  });
+
+  // Save (bookmark) logic
+  const saveIcon = document.getElementById("saveIcon");
+  let hasSaved = localStorage.getItem('saved') === 'true';
+
+  if (hasSaved) {
+    saveIcon.classList.remove('fa-regular');
+    saveIcon.classList.add('fa-solid');
+    saveIcon.style.color = "green";
+  }
+
+  saveIcon.addEventListener("click", () => {
+    if (!isSignedIn) {
+      alert("You need to sign in to save.");
+      return;
+    }
+    if (hasSaved) {
+      alert("Already saved.");
+      return;
+    }
+    saveIcon.classList.remove('fa-regular');
+    saveIcon.classList.add('fa-solid');
+    saveIcon.style.color = "green";
+    hasSaved = true;
+    localStorage.setItem('saved', true);
+  });
+</script>  
+        </article>
+    </body>
+</html>

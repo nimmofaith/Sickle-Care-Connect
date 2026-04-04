@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <img src="images/sicklecare logo.jpeg" alt="Logo" width="300px" height="110px">
+        </div>
+
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html" class="link">Home</a></li>
+
+                <!--about SCD-->
+                <li class="nav-items dropdown">
+                    <span class="link dropdown-toggle">About SCD ▾</span>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                        <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                        <li><a href="causes.html" class="link">Causes</a></li>
+                        <li><a href="treatment.html" class="link">Treatment</a></li>
+                    </ul>
+                </li>
+                <li><a href="findcare2.html" class="link">Find Care</a></li>
+                <li> <a href="sign in.html" class="btn">Sign in</a></li>
+
+
+            </ul>
+        </nav>
+    </header>
+
+
+    <!-- main content-->
+    <main style="padding: 20px; max-width: 900px; margin:auto;">
+        <h1>💊 Treatment for Sickle Cell Disease</h1>
+
+        <p>While there is no universal cure for Sickle Cell Disease (SCD), several treatments can help manage symptoms,
+            reduce complications, and improve quality of life.</p>
+
+        <h2>Common Treatments</h2>
+        <ul>
+            <li><strong>Medications:</strong> <em>Hydroxyurea</em> can reduce pain episodes and the need for blood
+                transfusions. Pain relievers and antibiotics are also commonly prescribed.</li>
+            <li><strong>Blood Transfusions:</strong> Help prevent strokes and treat severe anemia by increasing healthy
+                red blood cells.</li>
+            <li><strong>Bone Marrow / Stem Cell Transplant:</strong> Currently the only potential cure for some
+                patients, usually children, but not suitable for everyone.</li>
+            <li><strong>Vaccinations and Infection Prevention:</strong> Keeping up to date with vaccines and antibiotics
+                reduces the risk of infections due to a weakened spleen.</li>
+            <li><strong>Healthy Lifestyle:</strong> Proper hydration, nutrition, avoiding extreme temperatures, and
+                regular check-ups improve overall health and reduce crises.</li>
+        </ul>
+
+        <h2>Supportive Care</h2>
+        <p>Emotional and psychological support is important for patients and caregivers. Pain management plans, support
+            groups, and counseling can improve quality of life.</p>
+
+        <h2>Future Treatments</h2>
+        <p>Ongoing research includes gene therapy and new medications to improve red blood cell function. Advances in
+            medical science continue to offer hope for better outcomes.</p>
+    </main>
+
+    <!--js-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggle = document.querySelector('.dropdown-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+
+            dropdownToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function () {
+                dropdownMenu.style.display = 'none';
+            });
+        });
+    </script>
+
+</body>
+
+</html>
