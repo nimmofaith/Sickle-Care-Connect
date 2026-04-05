@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Portal - Sickle Care Connect</title>
+    <link rel="stylesheet" href="doctor-style.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>Doctor Portal</h1>
+            </div>
+            <div class="nav-menu hidden" id="navMenu">
+                <a href="#" class="nav-link" data-section="dashboard">Dashboard</a>
+                <a href="#" class="nav-link" data-section="patients">Patients</a>
+                <a href="#" class="nav-link" data-section="appointments">Appointments</a>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Login Section -->
+        <div id="loginSection" class="section active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2>Doctor Login</h2>
+                    <form id="loginForm" onsubmit="handleDoctorLogin(event)">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="loginEmail" required placeholder="doctor@hospital.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input type="password" id="loginPassword" required placeholder="Enter password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <p class="auth-toggle">Don't have an account? <a href="#"
+                            onclick="toggleSection('registerSection')">Register here</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="section">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2>Doctor Registration</h2>
+                    <form id="registerForm" onsubmit="handleDoctorRegister(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name:</label>
+                                <input type="text" id="regFirstName" required placeholder="Enter first name">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name:</label>
+                                <input type="text" id="regLastName" required placeholder="Enter last name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="regEmail" required placeholder="doctor@hospital.com">
+                        </div>
+                        <div class="form-group">
+                            <label>License Number:</label>
+                            <input type="text" id="regLicenseNumber" required placeholder="License #">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone:</label>
+                            <input type="tel" id="regPhone" required placeholder="enter phone number">
+                        </div>
+                        <div class="form-group">
+                            <label>Hospital:</label>
+                            <input type="text" id="regHospital" required placeholder="Enter hospital name">
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input type="password" id="regPassword" required placeholder="Enter password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password:</label>
+                            <input type="password" id="regConfirmPassword" required placeholder="Confirm password">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </form>
+                    <p class="auth-toggle">Already have an account? <a href="#"
+                            onclick="toggleSection('loginSection')">Login here</a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section">
+            <div class="dashboard-header">
+                <h2>Welcome,Dr. <span id="doctorName"></span></h2>
+                <p class="subtitle" id="doctorSubtitle"></p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <h3 id="totalPatients">0</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <h3 id="pendingAppointments">0</h3>
+                        <p>Pending Appointments</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-content">
+                        <h3 id="upcomingAppointments">0</h3>
+                        <p>Upcoming (Next 7 Days)</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💊</div>
+                    <div class="stat-content">
+                        <h3 id="activePrescriptions">0</h3>
+                        <p>Active Prescriptions</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Patients Section -->
+        <div id="patientsSection" class="section">
+            <div class="section-header">
+                <h2>My Patients</h2>
+                <input type="text" id="patientSearch" placeholder="Search patients..." class="search-box">
+            </div>
+
+            <div id="patientsContainer" class="patients-list">
+
+            </div>
+
+            <div id="patientDetailsView" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-btn" onclick="closePatientDetails()">&times;</span>
+                    <h2>Patient Details</h2>
+                    <div id="patientDetailsContent" class="details-content">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Prescription Form for this Patient -->
+                    <div class="prescription-form-section"
+                        style="margin-top: 2rem; border-top: 2px solid #ccc; padding-top: 2rem;">
+                        <h3>Add Prescription</h3>
+                        <form id="patientPrescriptionForm" onsubmit="handleCreatePrescriptionForPatient(event)">
+                            <div class="form-group">
+                                <label>Medication Name:</label>
+                                <input type="text" id="rxMedicationName" required placeholder="e.g., Hydroxyurea">
+                            </div>
+                            <div class="form-group">
+                                <label>Dosage:</label>
+                                <input type="text" id="rxDosage" required placeholder="e.g., 500mg">
+                            </div>
+                            <div class="form-group">
+                                <label>Frequency:</label>
+                                <input type="text" id="rxFrequency" required placeholder="e.g., Twice daily">
+                            </div>
+                            <div class="form-group">
+                                <label>Refill Date:</label>
+                                <input type="date" id="rxRefillDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Notes:</label>
+                                <textarea id="rxNotes" placeholder="Additional notes..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Prescription</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Section -->
+        <div id="appointmentsSection" class="section">
+            <div class="section-header">
+                <h2>Appointments</h2>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterAppointments('pending', event)">Pending</button>
+                    <button class="filter-btn" onclick="filterAppointments('approved', event)">Approved</button>
+                    <button class="filter-btn" onclick="filterAppointments('cancelled', event)">Cancelled</button>
+                </div>
+            </div>
+
+            <div id="appointmentsContainer" class="appointments-list">
+                <p>Loading appointments...</p>
+            </div>
+        </div>
+
+        <!-- Appointment History Section -->
+        <div id="historySection" class="section">
+            <div class="section-header">
+                <h2>Appointment History</h2>
+            </div>
+
+            <div id="historyContainer" class="appointments-list">
+                <p>Loading history...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="doctor-script.js"></script>
+</body>
+
+</html>

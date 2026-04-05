@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sickle Care Connect</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <script>
+        const userId = localStorage.getItem("user_id");
+        if (!userId) {
+            alert("You must be logged in to access this page");
+            window.location.href = "sign in.html";
+        }
+    </script>
+    <header class="navbar">
+        <img src="images/sicklecare logo.jpeg" alt="Logo" width="300px" height="110px">
+
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html" class="link">Home</a></li>
+
+                <!--about SCD-->
+                <li class="nav-items dropdown">
+                    <span class="link dropdown-toggle">About SCD ▾</span>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                        <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                        <li><a href="causes.html" class="link">Causes</a></li>
+                        <li><a href="treatment.html" class="link">Treatment</a></li>
+                    </ul>
+                </li>
+                <li> <a href="dashboard.html" class="link">Dashboard</a></li>
+                <li><a href="findcare2.html" class="link">Find Care</a></li>
+                <li class="auth-btn"></li>
+        </nav>
+    </header>
+
+    <!--js-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggle = document.querySelector('.dropdown-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+
+            dropdownToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function () {
+                dropdownMenu.style.display = 'none';
+            });
+        });
+    </script>
+
+    <div class="booking-container">
+        <form id="appointmentForm" class="booking-form">
+            <h2>Book an Appointment</h2>
+            <input type="text" id="full_name" placeholder="Enter Full Name" required> <br>
+            <input type="tel" id="phone" placeholder="Enter Phone Number" required><br>
+            <input type="email" id="email" placeholder="Enter Email" required>
+            <input type="text" id="hospital" placeholder="Hospital" readonly><br>
+            <input type="text" id="doctor" placeholder="Doctor/Specialist" readonly><br>
+            <input type="hidden" id="doctor_id" value="">
+            <h4>Preferred Appointment Date & Time</h4>
+            <input type="date" id="preferred_date" placeholder="Preferred Date" required><br>
+            <input type="time" id="preferred_time" placeholder="Preferred Time" required><br><br>
+            <button type="submit" class="book-btn">Confirm Appointment</button>
+
+        </form>
+    </div>
+    <script src="appointment.js"></script>
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const hospital = urlParams.get('hospital');
+        const doctor = urlParams.get('doctor');
+        const doctor_id = urlParams.get('doctor_id');
+
+        if (hospital) document.getElementById('hospital').value = hospital;
+        if (doctor) document.getElementById('doctor').value = doctor;
+        if (doctor_id) document.getElementById('doctor_id').value = doctor_id;
+
+        // Prefill from reschedule state if available
+        const rescheduleHospital = localStorage.getItem('reschedule_hospital');
+        const rescheduleDoctor = localStorage.getItem('reschedule_doctor');
+        const rescheduleDoctorId = localStorage.getItem('reschedule_doctor_id');
+        const rescheduleDate = localStorage.getItem('reschedule_date');
+        const rescheduleTime = localStorage.getItem('reschedule_time');
+
+        if (!hospital && rescheduleHospital) document.getElementById('hospital').value = rescheduleHospital;
+        if (!doctor && rescheduleDoctor) document.getElementById('doctor').value = rescheduleDoctor;
+        if (!doctor_id && rescheduleDoctorId) document.getElementById('doctor_id').value = rescheduleDoctorId;
+        if (rescheduleDate) document.getElementById('preferred_date').value = rescheduleDate;
+        if (rescheduleTime) document.getElementById('preferred_time').value = rescheduleTime;
+
+        // Remove the temporary reschedule prefill after use
+        localStorage.removeItem('reschedule_hospital');
+        localStorage.removeItem('reschedule_doctor');
+        localStorage.removeItem('reschedule_doctor_id');
+        localStorage.removeItem('reschedule_date');
+        localStorage.removeItem('reschedule_time');
+    </script>
+    <script src="navigation.js"></script>
+</body>

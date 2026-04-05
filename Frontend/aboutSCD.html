@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <div class="logo">
+            <img src="images/sicklecare logo.jpeg" alt="Logo" width="300px" height="110px">
+        </div>
+
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html" class="link">Home</a></li>
+
+                <!--about SCD-->
+                <li class="nav-items dropdown">
+                    <span class="link dropdown-toggle">About SCD ▾</span>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                        <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                        <li><a href="causes.html" class="link">Causes</a></li>
+                        <li><a href="treatment.html" class="link">Treatment</a></li>
+                    </ul>
+                </li>
+                <li id="findCareLink"><a href="findcare2.html" class="link">Find Care</a></li>
+                <li class="auth-btn"></li>
+        </nav>
+    </header>
+
+    <!--content-->
+    <main style="padding: 20px; max-width: 900px; margin:auto;">
+        <h1>💡 What is Sickle Cell Disease?</h1>
+        <p>Sickle Cell Disease (SCD) is a group of inherited red blood cell disorders characterized by the presence of
+            abnormal hemoglobin, called hemoglobin S.
+            This abnormal hemoglobin causes red blood cells to become rigid and shaped like a crescent or sickle, which
+            can lead to various health complications.</p>
+        <p>In individuals with SCD, the sickle-shaped red blood cells can block blood flow in small blood vessels,
+            leading to pain episodes, organ damage, and an increased risk of infections.
+            The severity of SCD can vary widely among individuals, with some experiencing mild symptoms while others may
+            have more severe complications.</p>
+        <p>SCD is a genetic condition that is inherited in an autosomal recessive pattern, meaning that a person must
+            inherit two copies of the sickle cell gene (one from each parent) to have the disease.
+            If a person inherits only one copy of the sickle cell gene, they are considered a carrier (sickle cell
+            trait) and usually do not experience symptoms of the disease, but they can pass the gene on to their
+            children.</p>
+
+
+        <h2>Types of Sickle Cell Disease</h2>
+        <p>There are several types of SCD, including:</p>
+        <ul>
+            <li><strong>Sickle Cell Anemia (HbSS):</strong> This is the most common and severe form of SCD, where a
+                person inherits two sickle cell genes (one from each parent).</li>
+            <li><strong>Sickle Hemoglobin C Disease (HbSC):</strong> This occurs when a person inherits one sickle cell
+                gene and one hemoglobin C gene. It is generally milder than sickle cell anemia.</li>
+            <li><strong>Sickle Beta-Thalassemia:</strong> This occurs when a person inherits one sickle cell gene and
+                one beta-thalassemia gene. The severity can vary depending on the specific mutations involved.</li>
+
+        </ul>
+
+        <h2>Key Factors</h2>
+        <ul>
+            <li>SCD is inherited from both parents.</li>
+            <li>The disease can cause anemia due to the shorter lifespan of red blood cells.</li>
+            <li>Pain episodes, called "crises," are common.</li>
+            <li>Proper medical care can help manage symptoms and prevent complications.</li>
+        </ul>
+
+
+        <h2>Importance of awareness</h2>
+        <p>Raising awareness about SCD is crucial for early diagnosis, proper management, and support for individuals
+            living with the disease.
+            Education about SCD can help reduce stigma, improve access to care, and promote research efforts aimed at
+            finding better treatments and ultimately a cure for this condition.</p>
+
+    </main>
+
+    <!--js-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggle = document.querySelector('.dropdown-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+
+            dropdownToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function () {
+                dropdownMenu.style.display = 'none';
+            });
+        });
+
+        });
+    </script>
+    <script src="navigation.js"></script>
+
+</body>
+
+</html>

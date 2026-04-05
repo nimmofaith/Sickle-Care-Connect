@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sickle Care Connect</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+    <header class="navbar">
+        <img src="images/sicklecare logo.jpeg" alt="Logo" width="300px" height="110px">
+
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html" class="link">Home</a></li>
+
+                <!--about SCD-->
+                <li class="nav-items dropdown">
+                    <span class="link dropdown-toggle">About SCD ▾</span>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                        <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                        <li><a href="causes.html" class="link">Causes</a></li>
+                        <li><a href="treatment.html" class="link">Treatment</a></li>
+                    </ul>
+                </li>
+                <li><a href="findcare2.html" class="link" id="findCareLink">Find Care</a></li>
+                <li class="auth-btn"></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!--js-->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggle = document.querySelector('.dropdown-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+
+            dropdownToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function () {
+                dropdownMenu.style.display = 'none';
+            });
+
+            // Check login for Find Care
+            const findCareLink = document.getElementById('findCareLink');
+            findCareLink.addEventListener('click', function (e) {
+                const userId = localStorage.getItem('user_id');
+                if (!userId) {
+                    e.preventDefault();
+                    alert('Please log in to access Find Care.');
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+    </script>
+    <script src="navigation.js"></script>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Connecting Sickle Cell Patients<br>to the Care They Deserve</h1>
+            <p>
+                Stronger connections. Better care. Healthier lives.
+            </p>
+        </div>
+    </section>
+    <section class="intro">
+        <h2>Welcome to Sickle Care Connect</h2>
+        <p>
+            Our platforms connects individuals living with Sickle Cell to the healthcare resources they need.
+            It provides easy access to information on care, support services, and patient communities to
+            help users manage their condition and stay informed about treatment options.
+            Please note, this website is not a doctor and does not provide medical advice.
+        </p>
+    </section>
+    <section class="article-section">
+        <a href="awareness.html" class="article-card">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCKjCjPFNZuXA0qwngJOf8Vt69CWHA_M8wMw&s"
+                alt="Awareness Articles">
+            <div class="card-content">
+                <h3>Awareness Articles</h3>
+                <p>Raising awareness about sickle cell empowers and reduced stigma.</p>
+            </div>
+        </a>
+        <a href="management.html" class="article-card">
+            <img src="images/Sickle-Cell-Anemia-Nursing-Care-Plans.jpg" alt="Management Articles">
+            <div class="card-content">
+                <h3>Management Articles</h3>
+                <p>Explore treatment options, daily care, and lifestyle tips.</p>
+            </div>
+        </a>
+    </section>
+
+</body>
+
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Sickle Care Connect</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar">
+        <img src="images/sicklecare logo.jpeg" alt="Logo" width="300px" height="110px">
+        <nav>
+            <ul class="nav-links">
+                <li class="nav-items dropdown">
+                    <span class="link dropdown-toggle">About SCD ▾</span>
+                    <ul class="dropdown-menu">
+                        <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+                        <li><a href="symptoms.html" class="link">Symptoms</a></li>
+                        <li><a href="causes.html" class="link">Causes</a></li>
+                        <li><a href="treatment.html" class="link">Treatment</a></li>
+                    </ul>
+                </li>
+                <li><a href="dashboard.html" class="link">Dashboard</a></li>
+                <li><a href="findcare2.html" class="link">Find Care</a></li>
+                <li class="auth-btn"></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="profile-section">
+        <h2>My Profile</h2>
+        <div id="profileDisplay" class="profile-card">
+            <!-- PERSONAL INFORMATION -->
+            <h3>Personal Information</h3>
+            <div class="info-grid">
+                <div class="label">Name</div>
+                <div class="value"><span id="displayName">-</span></div>
+                <div class="label">Email</div>
+                <div class="value"><span id="displayEmail">-</span></div>
+                <div class="label">Date of Birth</div>
+                <div class="value"><span id="displayDob">-</span></div>
+                <div class="label">Age</div>
+                <div class="value"><span id="displayAge">-</span></div>
+            </div>
+
+            <!-- CONTACT INFORMATION -->
+            <h3>Contact Information</h3>
+            <div class="info-grid">
+                <div class="label">Phone</div>
+                <div class="value"><span id="displayPhone">-</span></div>
+                <div class="label">Address</div>
+                <div class="value"><span id="displayAddress">-</span></div>
+                <div class="label">Emergency Contact</div>
+                <div class="value"><span id="displayEmergency">-</span></div>
+            </div>
+
+            <!-- MEDICAL INFORMATION -->
+            <h3>Medical Information</h3>
+            <div class="info-grid">
+                <div class="label">Weight</div>
+                <div class="value"><span id="displayWeight">-</span> kg</div>
+                <div class="label">Height</div>
+                <div class="value"><span id="displayHeight">-</span> cm</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button id="editProfileBtn" class="btn">Edit Profile</button>
+        </div>
+
+        <form id="profileForm" class="profile-form" style="display:none;">
+            <input type="text" id="nameInput" placeholder="Name" required>
+            <input type="email" id="emailInput" placeholder="Email" required>
+            <input type="date" id="dobInput" placeholder="Date of Birth" required>
+            <input type="number" id="weightInput" placeholder="Weight (kg)">
+            <input type="number" id="heightInput" placeholder="Height (cm)">
+            <input type="text" id="addressInput" placeholder="Address">
+            <input type="tel" id="phoneInput" placeholder="Phone">
+            <input type="text" id="emergencyInput" placeholder="Emergency Contact">
+            <div class="profile-buttons">
+                <button type="button" id="saveBtn" class="btn">Save</button>
+                <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </section>
+
+    <script>
+        const userId = localStorage.getItem('user_id');
+        if (!userId) {
+            alert('Please login to access profile.');
+            window.location.href = 'sign in.html';
+        }
+
+        const profileKeys = [
+            'name', 'email', 'dob', 'address', 'phone', 'weight', 'height', 'emergency'
+        ];
+
+        function calcAge(dob) {
+            if (!dob) return '-';
+            const birth = new Date(dob);
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            const m = today.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            return age >= 0 ? age : '-';
+        }
+
+        function setDisplay(data) {
+            document.getElementById('displayName').innerText = data.name || '-';
+            document.getElementById('displayEmail').innerText = data.email || '-';
+            document.getElementById('displayDob').innerText = data.dob || '-';
+            document.getElementById('displayAge').innerText = calcAge(data.dob);
+            document.getElementById('displayAddress').innerText = data.address || '-';
+            document.getElementById('displayPhone').innerText = data.phone || '-';
+            document.getElementById('displayWeight').innerText = data.weight || '-';
+            document.getElementById('displayHeight').innerText = data.height || '-';
+            document.getElementById('displayEmergency').innerText = data.emergency || '-';
+        }
+
+        function bindForm(data) {
+            document.getElementById('nameInput').value = data.name || '';
+            document.getElementById('emailInput').value = data.email || '';
+            document.getElementById('dobInput').value = data.dob || '';
+            document.getElementById('addressInput').value = data.address || '';
+            document.getElementById('phoneInput').value = data.phone || '';
+            document.getElementById('weightInput').value = data.weight || '';
+            document.getElementById('heightInput').value = data.height || '';
+            document.getElementById('emergencyInput').value = data.emergency || '';
+        }
+
+        const profileStorageKey = `profileData_${userId}`;
+
+        function loadProfile() {
+            const data = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+            setDisplay(data);
+            bindForm(data);
+        }
+
+        // function resetProfile() {
+        //     localStorage.removeItem(profileStorageKey);
+        //     setDisplay({});
+        //     bindForm({});
+        //     alert('Profile data cleared for this account.');
+        // }
+
+        document.getElementById('editProfileBtn').addEventListener('click', () => {
+            document.getElementById('profileForm').style.display = 'flex';
+            document.getElementById('profileDisplay').style.display = 'none';
+            document.getElementById('editProfileBtn').style.display = 'none';
+        });
+
+        // document.getElementById('resetProfileBtn').addEventListener('click', (e) => {
+        //     e.preventDefault();
+        //     if (confirm('Clear all saved profile data for this account?')) {
+        //         resetProfile();
+        //     }
+        // });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            document.getElementById('profileForm').style.display = 'none';
+            document.getElementById('profileDisplay').style.display = 'block';
+            document.getElementById('editProfileBtn').style.display = 'inline-block';
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const profile = {
+                name: document.getElementById('nameInput').value.trim(),
+                email: document.getElementById('emailInput').value.trim(),
+                dob: document.getElementById('dobInput').value,
+                address: document.getElementById('addressInput').value.trim(),
+                phone: document.getElementById('phoneInput').value.trim(),
+                weight: document.getElementById('weightInput').value.trim(),
+                height: document.getElementById('heightInput').value.trim(),
+                emergency: document.getElementById('emergencyInput').value.trim(),
+            };
+
+            localStorage.setItem(profileStorageKey, JSON.stringify(profile));
+            setDisplay(profile);
+
+            document.getElementById('profileForm').style.display = 'none';
+            document.getElementById('profileDisplay').style.display = 'block';
+            document.getElementById('editProfileBtn').style.display = 'inline-block';
+
+            alert('Profile saved successfully.');
+        });
+
+        loadProfile();
+    </script>
+    <script src="navigation.js"></script>
+</body>
+
+</html>

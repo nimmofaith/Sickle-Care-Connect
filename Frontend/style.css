@@ -1,0 +1,1176 @@
+body {
+    background-color: #f9f7f4;
+    font-family: 'Poppins', sans-serif;
+    color: #000;
+    line-height: 1.6;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 70px;
+    background-color: #fff;
+    border-bottom: 3px solid #800000;
+    ;
+}
+
+.logo {
+    height: 4px;
+    /* controls logo size */
+    width: 3px;
+    /* keeps aspect ratio */
+    object-fit: contain;
+}
+
+.btn {
+    background-color: #800000;
+    color: #fff;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.tag {
+    font-size: 13px;
+    font-family: sans-serif;
+    margin-top: 1px;
+    font-weight: 400;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 30px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.nav-links a:hover {
+    color: #1565c0;
+}
+
+.link {
+    color: #800000;
+}
+
+.btn {
+    background-color: #800000;
+    color: #fff;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+
+/* ===== HERO SECTION ===== */
+.hero {
+    min-height: 90vh;
+    background-image: url("images/sicklecare img.jpeg");
+    background-size: 100% auto;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.hero-content {
+    position: relative;
+    /* keeps text above overlay */
+    max-width: 500px;
+    padding: 60px;
+    margin-top: -150px;
+    color: #000;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    line-height: 1.2;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+.intro h2 {
+    text-align: center;
+    font-size: 200%;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    margin-top: 40px;
+}
+
+.intro p {
+    font-size: 1.2rem;
+    color: #333;
+    text-align: center;
+}
+
+/* ===== ARTICLES SECTION ===== */
+.article-section {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.article-card {
+    width: 420px;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #333;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.article-card img {
+    width: 420px;
+    height: 300px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content h3 {
+    margin-bottom: 10px;
+    color: #b11226;
+    /* red accent */
+}
+
+.card-content p {
+    font-size: 14px;
+    color: #555;
+}
+
+.article-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== SIGN IN/UP FORM ===== */
+.signin-container {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 30px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+.signin-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.signin-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.signin-form input:focus {
+    border-color: #1e88e5;
+}
+
+.signin-form button {
+    width: 100%;
+    padding: 12px;
+    background: #e53935;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.signin-form button:hover {
+    background: #800000;
+}
+
+.login-text {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.login-text a {
+    color: #1e88e5;
+    text-decoration: none;
+}
+
+/* ===== ABOUT SCD PAGE ===== */
+.nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #88bde0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 150px;
+    display: none;
+    flex-direction: column;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+/* Dropdown links */
+.dropdown-menu li a {
+    display: block;
+    padding: 8px 18px;
+    text-decoration: none;
+    color: #333;
+    font-size: 15px;
+}
+
+/* Hover effect */
+.dropdown-menu li a:hover {
+    background-color: #5fa8d8;
+}
+
+/* Show dropdown */
+.dropdown:hover .dropdown-menu {
+    display: flex;
+}
+
+/* Make the dropdown toggle show hand cursor */
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-toggle:hover {
+    color: #1565c0;
+}
+
+/* Main section about SCD css */
+main {
+    padding: 20px;
+    max-width: 800px;
+    margin: 30px auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+}
+
+/*headings */
+main h1 {
+    text-align: center;
+    color: #1e88e5;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+main h2 {
+    color: #1e88e5;
+    ;
+    font-size: 22px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-left: 6px solid #1e88e5;
+    padding-left: 10px
+}
+
+main p {
+    margin-bottom: 15px;
+    font-size: 16px;
+    line-height: 1.8;
+
+}
+
+/* lists*/
+main ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+main ul li {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    background-color: #e3eaff;
+    border-radius: 6px;
+    list-style: disc;
+}
+
+main ul li strong {
+    color: #1e88e5;
+    font-weight: 600;
+}
+
+
+/* ===== FIND CARE PAGE ===== */
+.search-bar {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 300px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 8px 12px;
+    margin-left: 5px;
+    border: none;
+    background: #007BFF;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Hospital cards */
+.hospital-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 10px auto;
+    max-width: 600px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-left: 6px solid #1e88e5;
+}
+
+
+.hospital-card h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.hospital-card p {
+    margin: 5px 0;
+    color: #282727;
+}
+
+/* Featured hospital */
+.icon {
+    color: #007BFF;
+    margin-right: 8px;
+}
+
+
+/* ===== BOOK APPOINTMENT PAGE ===== */
+.booking {
+    color: #800000;
+    cursor: pointer;
+    font-style: italic;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.booking:hover {
+    background: #b8d3f1;
+}
+
+.articles {
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px 20px;
+}
+
+
+.booking-container {
+    width: 100%;
+    max-width: 400px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 30px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    /* makes it a flex container */
+    justify-content: center;
+    /* centers horizontally */
+    align-items: center;
+    /* centers vertically (if needed) */
+    margin: auto;
+}
+
+.booking-appiontment h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.booking-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+.booking-form input:focus {
+    border-color: #1e88e5;
+}
+
+.booking-form button {
+    width: 100%;
+    padding: 12px;
+    background: #1e88e5;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.booking-form button:hover {
+    background: #2270b5;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .hero-content {
+        padding: 40px;
+    }
+
+    .hero-content h1 {
+        font-size: 2.2rem;
+    }
+}
+
+/* =========================
+   COMPREHENSIVE RESPONSIVE DESIGN
+   ========================= */
+
+@media (max-width: 768px) {
+
+    /* Navbar responsive */
+    .navbar {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .navbar img {
+        width: 200px !important;
+        height: 80px !important;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links .link {
+        display: block;
+        padding: 10px;
+    }
+
+    /* Dropdown responsive */
+    .dropdown-menu {
+        position: static;
+        display: none;
+        background: #fff;
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin-top: 5px;
+    }
+
+    .dropdown-toggle {
+        display: block;
+        padding: 10px;
+        background: #f8f8f8;
+        border-radius: 5px;
+    }
+
+    /* Hero section responsive */
+    .hero {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .hero-content h1 {
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+
+    /* Article cards responsive */
+    .article-section {
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .article-card {
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .article-card img {
+        width: 100%;
+        height: 200px;
+    }
+
+    /* Main content responsive */
+    main {
+        padding: 15px;
+        margin: 20px 10px;
+        font-size: 14px;
+    }
+
+    /* Dashboard responsive */
+    .health-summary {
+        padding: 20px 10px;
+        margin: 20px 10px;
+    }
+
+    .summary-cards-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .summary-card {
+        padding: 15px;
+    }
+
+    /* Tables responsive */
+    .med-table {
+        overflow-x: auto;
+    }
+
+    .med-table table {
+        min-width: 600px;
+    }
+
+    /* Profile responsive */
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .label {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .value {
+        padding: 10px;
+    }
+
+    /* Form responsive */
+    .booking-form {
+        padding: 15px;
+    }
+
+    .booking-form input,
+    .booking-form select,
+    .booking-form button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Hospital cards responsive */
+    .hospital-card {
+        margin: 10px 5px;
+        padding: 12px;
+    }
+
+    /* Symptom tracker responsive */
+    .symptom-tracker {
+        padding: 20px 10px;
+        margin: 20px 10px;
+    }
+
+    .symptom-tracker form {
+        gap: 15px;
+    }
+
+    /* Navigation auth buttons responsive */
+    .auth-btn {
+        display: flex;
+        gap: 10px;
+    }
+
+    .auth-btn {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .auth-btn .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Extra small screens */
+    .navbar {
+        padding: 10px 15px;
+    }
+
+    .navbar img {
+        width: 150px !important;
+        height: 60px !important;
+    }
+
+    .hero-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero-content p {
+        font-size: 0.9rem;
+    }
+
+    main h1 {
+        font-size: 1.5rem;
+    }
+
+    .health-summary h3 {
+        font-size: 24px;
+    }
+
+    .appointment-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .apt-date,
+    .apt-type,
+    .apt-time {
+        min-width: auto;
+        margin: 0;
+    }
+}
+
+/* Fix image distortion issues */
+.article-card img,
+.hospital-card img,
+main img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Ensure buttons don't overflow */
+.btn,
+button {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== DASHBOARD STYLES ===== */
+
+/* Health Summary Section */
+.health-summary {
+    background: #f9f9f9;
+    padding: 40px 20px;
+    margin: 40px auto;
+    border-radius: 8px;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.health-summary h3 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.summary-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.summary-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card i {
+    font-size: 40px;
+    color: #800000;
+    margin-bottom: 15px;
+}
+
+.summary-card h4 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.summary-card p {
+    font-size: 14px;
+    color: #666;
+    font-weight: 600;
+}
+
+/* Appointments Section */
+.appointments {
+    background: white;
+    padding: 40px 20px;
+    margin: 40px 0;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.appointments h3,
+.medications h3,
+.symptom-tracker h3,
+.medical-records h3,
+.emergency-contact h3,
+.community h3,
+.health-goals h3,
+.resources h3,
+.analytics h3,
+.find-care h3 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.appointment-list {
+    margin-bottom: 25px;
+}
+
+.appointment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-left: 4px solid #800000;
+    margin-bottom: 12px;
+    border-radius: 5px;
+}
+
+.apt-date {
+    font-weight: 600;
+    color: #800000;
+    min-width: 150px;
+}
+
+.apt-type {
+    flex: 1;
+    color: #333;
+    margin: 0 20px;
+}
+
+.apt-time {
+    color: #666;
+    font-size: 14px;
+}
+
+.btn-secondary {
+    background: #800000;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #a0094a;
+}
+
+/* Medications Section */
+.medications {
+    background: white;
+    padding: 40px 20px;
+    margin: 40px 0;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.med-table {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.med-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.med-table table thead {
+    background: #f0f0f0;
+}
+
+.med-table table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #800000;
+}
+
+.med-table table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    color: #666;
+}
+
+.med-table table tr:hover {
+    background: #f9f9f9;
+}
+
+.notes-row {
+    background: #f8f9fa;
+    border-top: none;
+}
+
+.notes-cell {
+    padding: 10px 15px;
+    font-style: italic;
+    color: #070707;
+    border-bottom: 1px solid #eee;
+}
+
+/* Symptom Tracker */
+.symptom-tracker {
+    background: #fff;
+    padding: 40px 20px;
+    margin: 40px 0;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.symptom-tracker form {
+    display: grid;
+    gap: 20px;
+}
+
+.symptom-tracker label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    color: #333;
+}
+
+.symptom-tracker input[type="text"],
+.symptom-tracker input[type="range"],
+.symptom-tracker select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: inherit;
+    margin-top: 8px;
+}
+
+.symptom-tracker input[type="range"] {
+    cursor: pointer;
+    accent-color: #800000;
+}
+
+/* Medical Records */
+.medical-records {
+    background: white;
+    padding: 40px 20px;
+    margin: 40px 0;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.records-info {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.profile-item {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-item label {
+    font-weight: 600;
+    color: #333;
+}
+
+.profile-item p {
+    color: #666;
+}
+
+.medical-records h4 {
+    font-size: 18px;
+    color: #333;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+#uploadForm {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+    max-width: 400px;
+}
+
+#uploadForm input,
+#uploadForm button {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: inherit;
+}
+
+#uploadForm button {
+    background: #800000;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#uploadForm button:hover {
+    background: #a0094a;
+}
+
+#documentsList {
+    list-style: none;
+    padding: 0;
+}
+
+#documentsList li {
+    padding: 12px;
+    background: #f9f9f9;
+    margin-bottom: 10px;
+    border-left: 4px solid #800000;
+    border-radius: 5px;
+    color: #666;
+}
+
+/* ===== Medication Form Layout ===== */
+#medForm {
+    display: flex;
+    flex-wrap: wrap;
+    /* allows button to go to next line */
+    gap: 10px;
+}
+
+/* Inputs stay in one row */
+#medForm input {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+/* Date slightly wider */
+#medForm input[type="date"] {
+    flex: 1.2;
+}
+
+/* Button goes to new line */
+#medForm button {
+    flex-basis: 100%;
+    /* forces new row */
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #800000;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#medForm button:hover {
+    background: #800000;
+}
+
+/* Medical Profile Card */
+.medical-profile {
+    background: white;
+    padding: 40px 20px;
+    margin: 40px 0;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.profile-card p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.profile-card strong {
+    display: inline-block;
+    width: 140px;
+}
+
+/* PROFILE SECTION */
+.profile-section {
+    padding: 40px;
+}
+
+.profile-section h2 {
+    margin-bottom: 20px;
+    color: #222;
+}
+
+/* CARD */
+.profile-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    max-width: 1200px;
+}
+
+/* HEADINGS */
+.profile-card h3 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    border-left: 4px solid #8b0000;
+    color: #333;
+}
+
+/* GRID LAYOUT */
+.info-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 12px 20px;
+    margin-bottom: 20px;
+}
+
+.label {
+    font-weight: 600;
+    color: #555;
+}
+
+.value {
+    background: #f8f8f8;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #222;
+}
+
+/* =========================
+   FIXED FORM SECTION
+   ========================= */
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 350px;
+    margin-top: 20px;
+}
+
+/* CLEAN INPUT (FIXED ISSUE) */
+#profileForm input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* BUTTONS */
+#profileForm button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: #800000;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    max-width: 220px;
+    align-self: center;
+    transition: 0.3s;
+}
+
+#profileForm button:hover {
+    background-color: #5c0000;
+}
+
+.profile-buttons {
+    display: flex;
+    gap: 10px;
+}

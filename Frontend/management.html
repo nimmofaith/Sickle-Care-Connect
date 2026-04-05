@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sickle Care Connect</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: Arial,
+        sans-serif;
+      line-height: 1.6;
+      margin: 2rem;
+      background-color:
+        #f9f9f9;
+      color: #333;
+    }
+
+    article {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius:
+        8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1,
+    h2 {
+      color: #2c3e50;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-weight: bold;
+      border-left: 6px solid #007BFF;
+      /* thick left border */
+      padding-left: 12px;
+      /* space between border and text */
+      margin-top: 20px;
+      color: #333;
+    }
+
+    .like-container {
+      text-align: left;
+      margin-top: 10px;
+      font-size: 24px;
+    }
+
+    .like-container i {
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .like-container i.liked {
+      color: red;
+      /* heart turns red when clicked */
+    }
+
+    .like-count {
+      margin-left: 8px;
+      font-size: 20px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar">
+    <img src="images/sicklecare logo.jpeg" alt="Logo" width="300px" height="110px">
+
+    </div>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html" class="link">Home</a></li>
+
+        <!--about SCD-->
+        <li class="nav-items dropdown">
+          <span class="link dropdown-toggle">About SCD ▾</span>
+
+          <ul class="dropdown-menu">
+            <li><a href="aboutSCD.html" class="link">What is SCD?</a></li>
+            <li><a href="symptoms.html" class="link">Symptoms</a></li>
+            <li><a href="causes.html" class="link">Causes</a></li>
+            <li><a href="treatment.html" class="link">Treatment</a></li>
+          </ul>
+        </li>
+        <li id="findCareLink"><a href="findcare2.html" class="link">Find Care</a></li>
+        <li class="auth-btn"></li>
+    </nav>
+  </header>
+
+  <!--js-->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dropdownToggle = document.querySelector('.dropdown-toggle');
+      const dropdownMenu = document.querySelector('.dropdown-menu');
+
+      dropdownToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function () {
+        dropdownMenu.style.display = 'none';
+      });
+    });
+  </script>
+  <article>
+    <header>
+      <hr>
+      <h1 style="color:#800000;">The Importance of Individual Care Plans and Pain Management in Sickle Cell Disease</h1>
+      <div class="like-container">
+        <i id="heartIcon" class="fa-regular fa-heart"></i>
+        <span id="likeCount" class="like-count">0</span>
+        <i id="saveIcon" class="fa-regular fa-bookmark" style="margin-left:15px;"></i>
+      </div>
+
+      <hr>
+    </header>
+    <img src="images/mangement article.jpeg" alt="Awareness Image" style="width: 500px; height:300px; display:block; 
+  margin:0 auto; border-radius:6px;">
+
+
+    <main>
+      <section>
+        <p>Sickle cell disease is a lifelong condition that requires consistent, specialized medical care. Because
+          symptoms can appear suddenly, patients may sometimes seek treatment at emergency centers that are not fully
+          equipped to manage the disorder. An individual care plan is therefore essential to ensure patients receive
+          timely and appropriate treatment wherever they go.</p>
+      </section>
+
+      <section>
+        <h2 style="color:#1e88e5; font-weight:bold;">What is an Individual Care Plan?</h2>
+        <p>An individual care plan is a personalized medical document developed by a patient in collaboration with their
+          physician or specialist care team. It typically includes:
+        </p>
+        <ul>
+          <li>The patient’s medical history</li>
+          <li>Contact details for primary and specialist physicians</li>
+          <li>Treatment guidelines for specific symptoms, crises, and emergencies</li>
+        </ul>
+        <p>This document serves as a guide for healthcare providers who may not be familiar with the patient’s
+          condition.
+          To maximize accessibility, the care plan should be kept on file with the patient’s primary physician.
+          For school-going patients, sharing a copy with the school nurse or administration is recommended.
+          Patients are also encouraged to carry a personal copy at all times to ensure appropriate care during
+          emergencies.
+        </p>
+      </section>
+
+      <section>
+        <h2 style="color:#1e88e5; font-weight:bold;">Pain Management in Sickle Cell Disease</h2>
+        <p>Pain is one of the most common and challenging symptoms of sickle cell disease.
+          It may be chronic—occurring regularly—or present as sudden, severe episodes known as vaso-occlusive crises.
+          These crises occur when sickled red blood cells block blood flow in small vessels,
+          leading to intense pain and potential complications.
+        </p>
+        <p>Improving quality of life often involves identifying and avoiding triggers such as dehydration,
+          extreme temperatures, stress, or illness. Keeping a record of pain episodes can help patients and healthcare
+          providers
+          recognize patterns and manage triggers more effectively.
+        </p>
+        <p>Alongside medical treatment, supportive methods may help ease discomfort, including:</p>
+        <ul>
+          <li>Heating pads</li>
+          <li>Warm baths</li>
+          <li>Massage therapy</li>
+          <li>Physical therapy</li>
+        </ul>
+        <p>All pain management strategies should be discussed with a healthcare provider to ensure safety and
+          effectiveness.</p>
+      </section>
+
+      <section>
+        <h2 style="color:#1e88e5; font-weight:bold;">Supporting Better Living with Sickle Cell Disease</h2>
+        <p>Living with sickle cell disease requires proactive planning, medical guidance, and continuous monitoring.
+          Individual care plans empower patients, families, schools, and healthcare providers to work together in
+          managing the condition.
+          Combined with effective pain management strategies, these plans help reduce complications and improve overall
+          wellbeing.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p style="text-align:center;color:#fa0404"><strong>Medical Disclaimer:</strong>
+        This information is provided for educational and awareness purposes only. It is <strong>NOT</strong>
+        intended to replace professional medical advice, diagnosis, or treatment. Always seek guidance from a
+        qualified healthcare provider regarding any medical concerns or treatment decisions!</p>
+    </footer>
+    <script>
+      // Simulated sign-in state (replace with real logic later)
+      let isSignedIn = false; // set to true when user signs in
+
+      // Heart (like) logic
+      const heartIcon = document.getElementById('heartIcon');
+      const likeCount = document.getElementById('likeCount');
+
+      let count = parseInt(localStorage.getItem('likeCount')) || 0;
+      let liked = localStorage.getItem('liked') === 'true';
+
+      likeCount.textContent = count;
+      if (liked) {
+        heartIcon.classList.remove('fa-regular');
+        heartIcon.classList.add('fa-solid', 'liked');
+        heartIcon.style.color = "red";
+      }
+
+      heartIcon.addEventListener('click', () => {
+        if (!isSignedIn) {
+          alert("You need to sign in to like.");
+          return;
+        }
+        if (liked) {
+          alert("You can only like once.");
+          return;
+        }
+        heartIcon.classList.remove('fa-regular');
+        heartIcon.classList.add('fa-solid', 'liked');
+        heartIcon.style.color = "red";
+        liked = true;
+        count++;
+        likeCount.textContent = count;
+        localStorage.setItem('likeCount', count);
+        localStorage.setItem('liked', liked);
+      });
+
+      // Save (bookmark) logic
+      const saveIcon = document.getElementById("saveIcon");
+      let hasSaved = localStorage.getItem('saved') === 'true';
+
+      if (hasSaved) {
+        saveIcon.classList.remove('fa-regular');
+        saveIcon.classList.add('fa-solid');
+        saveIcon.style.color = "green";
+      }
+
+      saveIcon.addEventListener("click", () => {
+        if (!isSignedIn) {
+          alert("You need to sign in to save.");
+          return;
+        }
+        if (hasSaved) {
+          alert("Already saved.");
+          return;
+        }
+        saveIcon.classList.remove('fa-regular');
+        saveIcon.classList.add('fa-solid');
+        saveIcon.style.color = "green";
+        hasSaved = true;
+        localStorage.setItem('saved', true);
+      });
+
+      // Hide Find Care link if not logged in
+    </script>
+    <script src="navigation.js"></script>
+
+
+  </article>
+</body>
+
+</html>
