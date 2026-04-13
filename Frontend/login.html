@@ -8,7 +8,9 @@
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
     <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="assets/fonts/poppins.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
@@ -54,20 +56,23 @@
             });
         });
     </script>
-    <div class="signin-container">
-        <form id="loginForm" class="signin-form">
-            <h2>Login</h2>
+    <div class="auth-container">
+        <div class="auth-card">
+            <form id="loginForm" class="signin-form">
+                <h2><i class="fa-solid fa-user"></i> Login</h2>
 
-            <input type="email" id="email" placeholder="Email Address" required>
-            <input type="password" id="password" placeholder="Password" required>
+                <input type="email" id="email" placeholder="Email Address" required>
+                <input type="password" id="password" placeholder="Password" required>
 
-            <button type="submit">Login</button>
-            <p class="login-text">
-        Do not have an account? <a href="sign in.html">Register here</a>
-      </p>
-        </form>
-        <script src="login.js"></script>
+                <button type="submit" class="btn-primary">Login</button>
+                <p class="login-text">
+                    Do not have an account? <a href="sign in.html">Register here</a>
+                </p>
+            </form>
+        </div>
     </div>
+    <script src="session.js"></script>
+    <script src="login.js"></script>
 </body>
 
 </html>

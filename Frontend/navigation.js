@@ -4,7 +4,11 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function updateNavigation() {
-    const userId = localStorage.getItem("user_id");
+    if (typeof ensurePatientSession === 'function') {
+        ensurePatientSession();
+    }
+
+    const userId = localStorage.getItem("patient_id");
     const navLinks = document.querySelector('.nav-links');
 
     if (!navLinks) return;
@@ -33,8 +37,12 @@ function updateNavigation() {
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', function () {
-                // Clear all session-local data to avoid stale profile carryover
-                localStorage.clear();
+                if (typeof clearPatientSession === 'function') {
+                    clearPatientSession();
+                } else {
+                    localStorage.removeItem('patient_id');
+                    localStorage.removeItem('session_expiry');
+                }
                 window.location.href = 'index.html';
             });
         }

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sickle Care Connect - Admin Dashboard</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin-style.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1><i class="fas fa-cog"></i> Admin Dashboard</h1>
+                <p>Manage hospitals, doctors, patients, and appointments</p>
+            </div>
+            <button id="logoutBtn" class="btn-secondary">Logout</button>
+        </div>
+
+        <div class="dashboard-wrapper">
+            <!-- Navigation Sidebar -->
+            <div class="admin-nav">
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-section="dashboard"><i
+                            class="fas fa-chart-line"></i>Dashboard</button>
+                    <button class="nav-tab" data-section="hospitals"><i class="fas fa-hospital"></i> Hospitals</button>
+                    <button class="nav-tab" data-section="doctors"><i class="fas fa-user-md"></i> Doctors</button>
+                    <button class="nav-tab" data-section="patients"><i class="fas fa-users"></i> Patients</button>
+                    <button class="nav-tab" data-section="appointments"><i class="fas fa-calendar-check"></i>
+                        Appointments</button>
+                    <button class="nav-tab" data-section="prescriptions"><i class="fas fa-pills"></i>
+                        Prescriptions</button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="content-wrapper">
+                <!-- Dashboard Section with Stats -->
+                <div id="dashboardSection" class="content-section">
+                    <h2 style="color: #800000; margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Dashboard
+                        Overview</h2>
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-card">
+                            <h3 id="totalHospitals">-</h3>
+                            <p>Total Hospitals</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="totalDoctors">-</h3>
+                            <p>Total Doctors</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="totalPatients">-</h3>
+                            <p>Total Patients</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="totalAppointments">-</h3>
+                            <p>Total Appointments</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="pendingAppointments">-</h3>
+                            <p>Pending Appointments</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="activePrescriptions">-</h3>
+                            <p>Active Prescriptions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hospitals Section -->
+                <div id="hospitalsSection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-hospital"></i> Hospitals Management</h2>
+                        <div class="filters">
+                            <input type="text" id="hospitalsSearch" class="search-input"
+                                placeholder="Search hospitals...">
+                            <button id="addHospitalBtn" class="btn-primary">+ Add Hospital</button>
+                        </div>
+                    </div>
+                    <div id="hospitalsTableContainer">
+                        <div class="loading">Loading hospitals...</div>
+                    </div>
+                </div>
+
+                <!-- Doctors Section -->
+                <div id="doctorsSection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-user-md"></i> Doctors Management</h2>
+                        <div class="filters">
+                            <input type="text" id="doctorsSearch" class="search-input" placeholder="Search doctors...">
+                            <select id="doctorsHospitalFilter" class="filter-select">
+                                <option value="">All Hospitals</option>
+                            </select>
+                            <button id="addDoctorBtn" class="btn-primary">+ Add Doctor</button>
+                        </div>
+                    </div>
+                    <div id="doctorsTableContainer">
+                        <div class="loading">Loading doctors...</div>
+                    </div>
+                </div>
+
+                <!-- Patients Section -->
+                <div id="patientsSection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> Patients Management</h2>
+                        <div class="filters">
+                            <input type="text" id="patientsSearch" class="search-input"
+                                placeholder="Search patients...">
+                        </div>
+                    </div>
+                    <div id="patientsTableContainer">
+                        <div class="loading">Loading patients...</div>
+                    </div>
+                </div>
+
+                <!-- Appointments Section -->
+                <div id="appointmentsSection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-calendar-check"></i> Appointments Management</h2>
+                        <div class="filters">
+                            <input type="text" id="appointmentsSearch" class="search-input"
+                                placeholder="Search appointments...">
+                            <select id="appointmentsStatusFilter" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="declined">Declined</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="appointmentsTableContainer">
+                        <div class="loading">Loading appointments...</div>
+                    </div>
+                </div>
+
+                <!-- Prescriptions Section -->
+                <div id="prescriptionsSection" class="content-section" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-pills"></i> Prescriptions Management</h2>
+                        <div class="filters">
+                            <input type="text" id="prescriptionsSearch" class="search-input"
+                                placeholder="Search prescriptions...">
+                            <select id="prescriptionsStatusFilter" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="discontinued">Discontinued</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="prescriptionsTableContainer">
+                        <div class="loading">Loading prescriptions...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Hospital Modal -->
+    <div id="hospitalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="hospitalModalTitle">Add Hospital</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="hospitalForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hospitalName">Hospital Name *</label>
+                        <input type="text" id="hospitalName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hospitalCity">City *</label>
+                        <input type="text" id="hospitalCity" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="hospitalLocation">Location *</label>
+                    <input type="text" id="hospitalLocation" required></input>
+                </div>
+                <div class="form-group">
+                    <label for="hospitalService">Service *</label>
+                    <input type="text" id="hospitalService" required>
+                </div>
+                <div class="form-group">
+                    <label for="hospitalNotes">Notes</label>
+                    <input type="text" id="hospitalNotes"></input>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Hospital</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Doctor Modal -->
+    <div id="doctorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="doctorModalTitle">Add Doctor</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="doctorForm">
+                <div class="form-group">
+                    <label for="doctorName">Doctor Name *</label>
+                    <input type="text" id="doctorName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="doctorEmail">Email *</label>
+                        <input type="email" id="doctorEmail" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="doctorSpecialization">Specialization *</label>
+                        <input type="text" id="doctorSpecialization" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doctorLicense">License Number *</label>
+                        <input type="text" id="doctorLicense" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="doctorHospital">Hospital *</label>
+                    <select id="doctorHospital" required>
+                        <option value="">Select Hospital</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Doctor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Patient Modal -->
+    <div id="patientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="patientModalTitle">Edit Patient</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="patientForm">
+                <div class="form-group">
+                    <label for="patientName">Patient Name *</label>
+                    <input type="text" id="patientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientEmail">Email *</label>
+                    <input type="email" id="patientEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="patientPassword">Temporary Password</label>
+                    <input type="password" id="patientPassword" placeholder="Leave blank to keep current password">
+                </div>
+                <div class="form-group">
+                    <label for="patientConfirmPassword">Confirm Temporary Password</label>
+                    <input type="password" id="patientConfirmPassword" placeholder="Confirm temporary password">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Patient</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Update Status</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="statusForm">
+                <div class="form-group">
+                    <label for="statusSelect">Status</label>
+                    <select id="statusSelect" required>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="active">Active</option>
+                        <option value="discontinued">Discontinued</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="statusNotes">Notes</label>
+                    <textarea id="statusNotes" rows="3" placeholder="Optional notes..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-session.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+
+</html>

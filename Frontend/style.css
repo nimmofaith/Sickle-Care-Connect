@@ -13,14 +13,11 @@ body {
     padding: 20px 70px;
     background-color: #fff;
     border-bottom: 3px solid #800000;
-    ;
 }
 
 .logo {
-    height: 4px;
-    /* controls logo size */
-    width: 3px;
-    /* keeps aspect ratio */
+    max-width: 220px;
+    height: auto;
     object-fit: contain;
 }
 
@@ -60,17 +57,6 @@ body {
 .link {
     color: #800000;
 }
-
-.btn {
-    background-color: #800000;
-    color: #fff;
-    padding: 12px 24px;
-    text-decoration: none;
-    border-radius: 5px;
-    font-weight: 500;
-    transition: 0.3s;
-}
-
 
 /* ===== HERO SECTION ===== */
 .hero {
@@ -198,19 +184,89 @@ body {
     border-color: #1e88e5;
 }
 
-.signin-form button {
-    width: 100%;
-    padding: 12px;
-    background: #e53935;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 140px);
+    padding: 20px;
 }
 
-.signin-form button:hover {
-    background: #800000;
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.12);
+}
+
+.auth-card h2 {
+    margin-bottom: 24px;
+    text-align: center;
+    color: #222;
+}
+
+.btn-primary {
+    background-color: #800000;
+    color: #fff;
+    border: none;
+    padding: 14px 0;
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #c40d0d;
+}
+
+.alert-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 14px 18px;
+    border-radius: 10px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15);
+    color: #fff;
+    max-width: 320px;
+    line-height: 1.4;
+    opacity: 0.98;
+    animation: slideIn 0.3s ease;
+}
+
+.alert-success {
+    background: #2f8f4d;
+}
+
+.alert-error {
+    background: #c92c2c;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(40px);
+        opacity: 0;
+    }
 }
 
 .login-text {
@@ -219,19 +275,26 @@ body {
     font-size: 14px;
 }
 
+.profile-cta {
+    display: flex;
+    justify-content: flex-end;
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    padding: 0 20px;
+}
+
+.profile-cta .btn-primary {
+    padding: 12px 24px;
+    font-size: 1rem;
+    border-radius: 8px;
+}
+
 .login-text a {
     color: #1e88e5;
     text-decoration: none;
 }
 
 /* ===== ABOUT SCD PAGE ===== */
-.nav-links {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
 .dropdown {
     position: relative;
 }
@@ -901,43 +964,6 @@ button {
     border-bottom: 1px solid #eee;
 }
 
-/* Symptom Tracker */
-.symptom-tracker {
-    background: #fff;
-    padding: 40px 20px;
-    margin: 40px 0;
-    border-radius: 8px;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.symptom-tracker form {
-    display: grid;
-    gap: 20px;
-}
-
-.symptom-tracker label {
-    display: flex;
-    flex-direction: column;
-    font-weight: 600;
-    color: #333;
-}
-
-.symptom-tracker input[type="text"],
-.symptom-tracker input[type="range"],
-.symptom-tracker select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-family: inherit;
-    margin-top: 8px;
-}
-
-.symptom-tracker input[type="range"] {
-    cursor: pointer;
-    accent-color: #800000;
-}
 
 /* Medical Records */
 .medical-records {
@@ -981,46 +1007,7 @@ button {
     margin-bottom: 15px;
 }
 
-#uploadForm {
-    display: grid;
-    gap: 15px;
-    margin-bottom: 30px;
-    max-width: 400px;
-}
 
-#uploadForm input,
-#uploadForm button {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-family: inherit;
-}
-
-#uploadForm button {
-    background: #800000;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-#uploadForm button:hover {
-    background: #a0094a;
-}
-
-#documentsList {
-    list-style: none;
-    padding: 0;
-}
-
-#documentsList li {
-    padding: 12px;
-    background: #f9f9f9;
-    margin-bottom: 10px;
-    border-left: 4px solid #800000;
-    border-radius: 5px;
-    color: #666;
-}
 
 /* ===== Medication Form Layout ===== */
 #medForm {
@@ -1059,6 +1046,65 @@ button {
 
 #medForm button:hover {
     background: #800000;
+}
+
+/* Medical Profile Section within Health Summary */
+.medical-profile-section {
+    margin-top: 40px;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.medical-profile-section h4 {
+    color: #b11226;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.profile-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.profile-form-grid input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.profile-form-grid input:focus {
+    border-color: #b11226;
+    outline: none;
+}
+
+.profile-display .profile-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 0;
+}
+
+.profile-display .profile-card p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.profile-display .profile-card strong {
+    display: inline-block;
+    width: 120px;
+    color: #666;
 }
 
 /* Medical Profile Card */
@@ -1130,9 +1176,6 @@ button {
     color: #222;
 }
 
-/* =========================
-   FIXED FORM SECTION
-   ========================= */
 
 .profile-form {
     display: flex;
@@ -1142,7 +1185,6 @@ button {
     margin-top: 20px;
 }
 
-/* CLEAN INPUT (FIXED ISSUE) */
 #profileForm input {
     width: 100%;
     padding: 8px 10px;
@@ -1167,10 +1209,19 @@ button {
 }
 
 #profileForm button:hover {
-    background-color: #5c0000;
+    background-color: #9f0606;
 }
 
 .profile-buttons {
     display: flex;
     gap: 10px;
+}
+.profile{
+    background: white;
+    padding: 40px 20px;
+    margin: 40px 0;
+    border-radius: 8px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
 }

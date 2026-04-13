@@ -1,26 +1,39 @@
-# app.py for Sickle Care Connect
+import os
 from routes import routes
 from doctor_routes import doctor_routes
+from admin_routes import admin_routes
 from flask import Flask, jsonify
 from flask_cors import CORS
 from db import db
 from sqlalchemy import inspect, text
 from datetime import datetime
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  #
 
-# Initialize Flask app
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app,
+     resources={
+         r"/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500"]}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-Doctor-ID"])
 
-# Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sicklecare.db'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "sicklecare.db")}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize extensions
+# JWT Configuration
+app.config['JWT_SECRET_KEY'] = os.getenv(
+    'JWT_SECRET_KEY', 'your-secret-key-change-in-production')
+
 db.init_app(app)
 
 app.register_blueprint(routes)
 app.register_blueprint(doctor_routes)
+app.register_blueprint(admin_routes)
 
 
 @app.errorhandler(500)
@@ -31,11 +44,12 @@ def internal_error(error):
     return response
 
 
-# Create database tables if they don't exist
 with app.app_context():
     db.create_all()
 
     inspector = inspect(db.engine)
+
+    # Check and add missing columns to appointment table
     appointment_cols = [c['name']
                         for c in inspector.get_columns('appointment')]
 
@@ -47,9 +61,37 @@ with app.app_context():
         db.session.execute(
             text("ALTER TABLE appointment ADD COLUMN status VARCHAR(50) DEFAULT 'pending'"))
 
+    # Check and add missing created_at columns to other tables (SQLite compatible)
+    tables_to_check = ['patient', 'doctor', 'prescription',
+                       'hospital', 'medical_profile', 'consultation_note']
+
+    for table_name in tables_to_check:
+        try:
+            table_cols = [c['name'] for c in inspector.get_columns(table_name)]
+            if 'created_at' not in table_cols:
+                # Add column without default for SQLite compatibility
+                db.session.execute(
+                    text(f'ALTER TABLE {table_name} ADD COLUMN created_at DATETIME'))
+                # Update existing rows with current timestamp
+                db.session.execute(
+                    text(f"UPDATE {table_name} SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL"))
+                print(f"Added created_at column to {table_name} table")
+        except Exception as e:
+            print(f"Column {table_name}.created_at: {e}")
+
+    try:
+        prescription_cols = [c['name']
+                             for c in inspector.get_columns('prescription')]
+        if 'refill_date' not in prescription_cols:
+            db.session.execute(
+                text('ALTER TABLE prescription ADD COLUMN refill_date VARCHAR(50)'))
+            print("Added refill_date column to prescription table")
+    except Exception as e:
+        print(f"Column prescription.refill_date: {e}")
+
     db.session.commit()
 
-    # Clean up past canceled appointments 
+    # Clean up past canceled appointments
     from models import Appointment, DoctorAppointment
     today_str = datetime.now().date().isoformat()
 
@@ -68,14 +110,11 @@ with app.app_context():
     if past_canceled > 0 or past_canceled_doc > 0:
         db.session.commit()
 
-# Home route
-
 
 @app.route("/")
 def home():
     return {"message": "Welcome to Sickle Care Connect API"}
 
 
-# Run server
 if __name__ == '__main__':
     app.run(debug=True)

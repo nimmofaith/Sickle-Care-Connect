@@ -1,33 +1,114 @@
-// doctor-script.js 
-
-const API_BASE = "http://localhost:5000";
-let doctorId = null; // Don't set from localStorage initially
-let doctorName = null; // Don't set from localStorage initially
+const API_BASE = "http://127.0.0.1:5000";
+let doctorId = null;
+let doctorName = null;
 let currentFilter = "pending";
-let currentPatientId = null;  // Track current patient for prescriptions
+let currentPatientId = null;
+
+function getDoctorAuthHeaders() {
+    const token = localStorage.getItem('doctor_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+const originalFetch = window.fetch.bind(window);
+window.fetch = (input, init = {}) => {
+    let url = typeof input === 'string' ? input : input.url;
+    if (url && url.startsWith(`${API_BASE}/doctor`)) {
+        init = init || {};
+        init.headers = {
+            ...(init.headers || {}),
+            ...getDoctorAuthHeaders()
+        };
+    }
+    return originalFetch(input, init);
+};
 
 // ==============================
 // Validation Functions
 // ==============================
 
-function validatePhone(phone) {
-    // Local format: 0XXXXXXXXX (10 digits)
-    const localPattern = /^0\d{9}$/;
-
-    // International format: +XXXXXXXXXXX (10 to 15 digits total)
-    const intlPattern = /^\+\d{9,14}$/;
-
-    return localPattern.test(phone) || intlPattern.test(phone);
-}
-
 function enforceLogin() {
-    // Enforce login check for protected sections
-    if (!doctorId) {
-        // Silently redirect to login without alert
+    // Check session validity
+    if (!ensureDoctorSession()) {
+        return false;
+    }
+
+    // Get current doctor info from session
+    const currentDoctor = getCurrentDoctor();
+    if (!currentDoctor) {
         showSection("loginSection");
         return false;
     }
+
+    // Update global variables
+    doctorId = currentDoctor.id;
+    doctorName = currentDoctor.name;
+
     return true;
+}
+
+// ==============================
+// UNIFIED PRESCRIPTION LOGIC (SHARED)
+// ==============================
+
+/**
+ * Calculate computed status (NOT stored as "Overdue")
+ */
+function calculatePrescriptionStatus(prescription) {
+    if (!prescription || !prescription.status) {
+        return 'active';  // Default to active if no status
+    }
+
+    if (prescription.status === 'discontinued') {
+        return 'discontinued';
+    }
+
+    if (prescription.status === 'active' && prescription.end_date) {
+        if (new Date(prescription.end_date) <= new Date()) {
+            return 'completed';
+        }
+    }
+
+    return prescription.status === 'active' ? 'active' : prescription.status;
+}
+
+/**
+ * Check if prescription is overdue (NEVER stored)
+ */
+function isPrescriptionOverdue(prescription) {
+    if (!prescription.refill_date || prescription.status === 'discontinued' || prescription.status === 'completed') {
+        return false;
+    }
+
+    const computedStatus = calculatePrescriptionStatus(prescription);
+    if (computedStatus !== 'active') {
+        return false;
+    }
+
+    return new Date() > new Date(prescription.refill_date);
+}
+
+/**
+ * Get human-readable instruction (NEVER stored)
+ */
+function getInstructionDisplay(prescription) {
+    if (prescription.status === 'discontinued') {
+        return 'Discontinued';
+    }
+
+    if (prescription.end_date) {
+        const endDate = new Date(prescription.end_date);
+        return `Take until ${endDate.toLocaleDateString()}`;
+    }
+
+    if (prescription.refill_date) {
+        if (isPrescriptionOverdue(prescription)) {
+            return '⚠ Refill overdue';
+        }
+        const refillDate = new Date(prescription.refill_date);
+        return `Refill due ${refillDate.toLocaleDateString()}`;
+    }
+
+    return 'As needed';
 }
 
 // ==============================
@@ -38,19 +119,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // Ensure navigation is hidden initially
     hideNavigation();
 
-    // More robust authentication check
-    const storedDoctorId = localStorage.getItem("doctorId");
-    const storedDoctorName = localStorage.getItem("doctorName");
+    // Check session validity
+    if (ensureDoctorSession()) {
+        // Session is valid, show logged in view
+        const currentDoctor = getCurrentDoctor();
+        if (currentDoctor) {
+            doctorId = currentDoctor.id;
+            doctorName = currentDoctor.name;
+            showLoggedInView();
+            showSection("dashboardSection");
+            loadDashboard();
 
-    if (storedDoctorId && storedDoctorName) {
-        // User appears to be logged in, verify with backend
-        verifyAuthentication(storedDoctorId);
+            // Auto-refresh appointments every 30 seconds
+            setInterval(() => {
+                if (document.getElementById("appointmentsSection")?.classList.contains("active")) {
+                    loadAppointments();
+                }
+            }, 30000);
+        }
     } else {
-        // Show login view
         showSection("loginSection");
     }
 
-    // Setup navigation listeners
     document.querySelectorAll(".nav-link").forEach(link => {
         link.addEventListener("click", (e) => {
             e.preventDefault();
@@ -68,42 +158,35 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-
-    // Setup patient search
-    const searchBox = document.getElementById("patientSearch");
-    if (searchBox) {
-        searchBox.addEventListener("input", debounce(() => searchPatients(), 300));
-    }
 });
-
-// ==============================
-// Authentication Verification
-// ==============================
 
 async function verifyAuthentication(storedDoctorId) {
     try {
-        // Quick verification call to backend
+        const token = localStorage.getItem('doctor_token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const response = await fetch(`${API_BASE}/doctor/dashboard`, {
-            headers: { "X-Doctor-ID": storedDoctorId }
+            headers
         });
 
         if (response.ok) {
+            const data = await response.json();
             // Authentication valid, proceed to logged-in state
-            doctorId = storedDoctorId; // Set global doctorId
-            doctorName = localStorage.getItem("doctorName");
+            doctorName = data?.doctor_name || localStorage.getItem("doctorName");
+            if (doctorName) {
+                localStorage.setItem("doctorName", doctorName);
+            }
             showLoggedInView();
-            showSection("dashboardSection"); // Show dashboard instead of login
+            showSection("dashboardSection");
             loadDashboard();
         } else {
             // Authentication failed, clear storage and show login
             console.log("Authentication verification failed, clearing session");
-            localStorage.removeItem("doctorId");
-            localStorage.removeItem("doctorName");
+            clearDoctorSession();
             localStorage.removeItem("doctorSpecialization");
             localStorage.removeItem("hospitalId");
-            doctorId = null; // Clear global doctorId
-            doctorName = null; // Clear global doctorName
-            hideNavigation(); // Ensure navigation is hidden
+            doctorId = null;
+            doctorName = null;
+            hideNavigation();
             showSection("loginSection");
         }
     } catch (error) {
@@ -137,14 +220,16 @@ async function handleDoctorLogin(event) {
 
         if (response.ok) {
             doctorId = data.doctor_id;
-            doctorName = data.name;
-            localStorage.setItem("doctorId", doctorId);
-            localStorage.setItem("doctorName", doctorName);
+            doctorName = data.doctor_name || data.name;
+
+            // Use session management instead of direct localStorage
+            setDoctorSession(doctorId, doctorName);
+            localStorage.setItem("doctor_token", data.token);
             localStorage.setItem("doctorSpecialization", data.specialization);
             localStorage.setItem("hospitalId", data.hospital_id);
 
             showLoggedInView();
-            showSection("dashboardSection"); // Show dashboard after login
+            showSection("dashboardSection");
             loadDashboard();
             showAlert("Login successful!", "success");
         } else {
@@ -159,23 +244,20 @@ async function handleDoctorLogin(event) {
 async function handleDoctorRegister(event) {
     event.preventDefault();
 
-    const phone = document.getElementById("regPhone").value;
+    const email = document.getElementById("regEmail").value;
+    const password = document.getElementById("regPassword").value;
+    const confirmPassword = document.getElementById("regConfirmPassword").value;
 
-    // Validate phone number
-    if (!validatePhone(phone)) {
-        showAlert("Invalid phone number. Use format +254XXXXXXXXX or 07XXXXXXXX", "error");
+    // Check if passwords match
+    if (password !== confirmPassword) {
+        showAlert("Passwords do not match", "error");
         return;
     }
 
     const formData = {
-        email: document.getElementById("regEmail").value,
-        password: document.getElementById("regPassword").value,
-        confirm_password: document.getElementById("regConfirmPassword").value,
-        first_name: document.getElementById("regFirstName").value,
-        last_name: document.getElementById("regLastName").value,
-        license_number: document.getElementById("regLicenseNumber").value,
-        phone: phone,
-        hospital_name: document.getElementById("regHospital").value
+        email: email,
+        password: password,
+        confirm_password: confirmPassword
     };
 
     try {
@@ -201,13 +283,12 @@ async function handleDoctorRegister(event) {
 }
 
 function logout() {
-    localStorage.removeItem("doctorId");
-    localStorage.removeItem("doctorName");
+    clearDoctorSession();
     localStorage.removeItem("doctorSpecialization");
     localStorage.removeItem("hospitalId");
     doctorId = null;
     doctorName = null;
-    hideNavigation(); // Hide navigation when logged out
+    hideNavigation();
     showSection("loginSection");
     showAlert("Logged out successfully", "success");
 }
@@ -249,10 +330,7 @@ function showSection(sectionId) {
 }
 
 function toggleSection(sectionId) {
-    document.querySelectorAll(".section").forEach(section => {
-        section.classList.remove("active");
-    });
-    document.getElementById(sectionId).classList.add("active");
+    showSection(sectionId);
 }
 
 // ==============================
@@ -262,7 +340,7 @@ function toggleSection(sectionId) {
 async function loadDashboard() {
     try {
         const response = await fetch(`${API_BASE}/doctor/dashboard`, {
-            headers: { "X-Doctor-ID": doctorId }
+            headers: getDoctorAuthHeaders()
         });
 
         if (response.ok) {
@@ -273,7 +351,6 @@ async function loadDashboard() {
             document.getElementById("upcomingAppointments").textContent = data.approved_appointments;
             document.getElementById("activePrescriptions").textContent = data.active_prescriptions;
 
-            // Load recent consultations (placeholder - would need additional endpoint)
         }
     } catch (error) {
         console.error("Error loading dashboard:", error);
@@ -308,13 +385,17 @@ async function loadPatients() {
 
 function displayPatients(patients) {
     const container = document.getElementById("patientsContainer");
+    if (!container) return;
 
-    if (patients.length === 0) {
+
+    const patientsArray = Array.isArray(patients) ? patients : [];
+
+    if (patientsArray.length === 0) {
         container.innerHTML = "<p>No patients assigned yet</p>";
         return;
     }
 
-    container.innerHTML = patients.map(patient => `
+    container.innerHTML = patientsArray.map(patient => `
         <div class="patient-card">
             <div class="card-header">
                 <div class="card-title">${patient.name}</div>
@@ -348,20 +429,15 @@ function displayPatients(patients) {
         </div>
     `).join("");
 
-    // Bind click events using event listeners to avoid inline onclick reliability issues
     container.querySelectorAll('.view-details-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const pid = btn.dataset.patientId;
             viewPatientDetails(pid);
         });
     });
-
-    console.log("Patient cards rendered and event listeners attached");
 }
 
 async function viewPatientDetails(patientId) {
-    console.log("viewPatientDetails called", patientId);
-
     if (!patientId) {
         console.error("Invalid patientId passed to viewPatientDetails", patientId);
         showAlert("Unable to load patient details (missing ID)", "error");
@@ -372,8 +448,6 @@ async function viewPatientDetails(patientId) {
         const response = await fetch(`${API_BASE}/doctor/patients/${patientId}`, {
             headers: { "X-Doctor-ID": doctorId }
         });
-
-        console.log("patient details response status", response.status);
 
         if (response.ok) {
             const data = await response.json();
@@ -424,17 +498,47 @@ function displayPatientDetailsModal(data) {
 
         <div class="detail-section">
             <h3>Active Prescriptions</h3>
-            ${data.active_prescriptions.length > 0 ? `
-                <div style="margin-top: 1rem;">
-                    ${data.active_prescriptions.map(p => `
-                        <div class="detail-row" style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong>${p.medication}</strong>: ${p.dosage} - ${p.frequency}
-                            </div>
-                            <button type="button" class="action-btn action-btn-decline" onclick="event.stopPropagation(); removePrescription(${p.id})" style="margin: 0;">Remove</button>
-                        </div>
-                    `).join("")}
-                </div>
+            ${Array.isArray(data.active_prescriptions) && data.active_prescriptions.length > 0 ? `
+                <table class="prescriptions-table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                    <thead style="background: #f8f9fa;">
+                        <tr>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Medication</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Dosage</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Frequency</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Instruction</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Status</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.active_prescriptions.map(p => {
+        const instruction = getInstructionDisplay(p);
+        const isOverdue = isPrescriptionOverdue(p);
+        const computedStatus = calculatePrescriptionStatus(p) || 'unknown';
+        const statusClass = computedStatus || 'unknown';
+        const instructionHtml = isOverdue
+            ? `<span style="color: #ff6b6b; font-weight: 600;">${instruction}</span>`
+            : instruction;
+
+        return `
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">${p.medication || p.medication_name || "N/A"}</td>
+                                    <td style="padding: 10px;">${p.dosage || "N/A"}</td>
+                                    <td style="padding: 10px;">${p.frequency || "N/A"}</td>
+                                    <td style="padding: 10px;">${instructionHtml}</td>
+                                    <td style="padding: 10px;">
+                                        <span class="status-badge status-${statusClass}" style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                            ${(statusClass || 'unknown').charAt(0).toUpperCase() + (statusClass || 'unknown').slice(1)}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 10px;">
+                                        <button type="button" class="action-btn action-btn-decline" onclick="event.stopPropagation(); removePrescription(${p.id || 0})" style="margin: 0; padding: 6px 10px; font-size: 12px;">Remove</button>
+                                    </td>
+                                </tr>
+                            `;
+    }).join("")}
+                    </tbody>
+                </table>
             ` : "<p>No active prescriptions</p>"}
         </div>
 
@@ -483,7 +587,7 @@ function displayPatientDetailsModal(data) {
         </div>
     `;
 
-    currentPatientId = data.patient.id;  // Store for prescription creation
+    currentPatientId = data.patient.id;
     modal.classList.remove("hidden");
 }
 
@@ -491,9 +595,42 @@ function closePatientDetails() {
     document.getElementById("patientDetailsView").classList.add("hidden");
 }
 
+// ==============================
+// Prescription Type Toggle
+// ==============================
+
+function togglePrescriptionDateField() {
+    const prescriptionType = document.querySelector('input[name="prescriptionType"]:checked').value;
+    const endDateGroup = document.getElementById("endDateGroup");
+    const refillDateGroup = document.getElementById("refillDateGroup");
+    const rxEndDate = document.getElementById("rxEndDate");
+    const rxRefillDate = document.getElementById("rxRefillDate");
+
+    if (prescriptionType === "short-term") {
+        endDateGroup.style.display = "block";
+        refillDateGroup.style.display = "none";
+        rxEndDate.required = true;
+        rxRefillDate.required = false;
+    } else {
+        endDateGroup.style.display = "none";
+        refillDateGroup.style.display = "block";
+        rxEndDate.required = false;
+        rxRefillDate.required = true;
+    }
+}
+
+// ==============================
+// Patient Search
+// ==============================
+
 async function searchPatients() {
     const query = document.getElementById("patientSearch").value;
-    if (query.length < 2) return;
+    if (query.length < 2) {
+        document.querySelectorAll(".patient-card").forEach(card => {
+            card.style.display = "block";
+        });
+        return;
+    }
 
     try {
         const response = await fetch(
@@ -503,14 +640,14 @@ async function searchPatients() {
 
         if (response.ok) {
             const data = await response.json();
-            // Filter displayed patients based on search results
+            const resultIds = new Set(data.results.map(r => r.patient_id));
             const container = document.getElementById("patientsContainer");
             const allCards = container.querySelectorAll(".patient-card");
-            const resultIds = new Set(data.results.map(r => r.patient_id));
 
             allCards.forEach(card => {
-                const patientName = card.querySelector(".card-title").textContent.toLowerCase();
-                card.style.display = patientName.includes(query.toLowerCase()) ? "block" : "none";
+                const idText = card.querySelector(".patient-id")?.textContent || "";
+                const patientId = parseInt(idText.replace('#', ''), 10);
+                card.style.display = resultIds.has(patientId) ? "block" : "none";
             });
         }
     } catch (error) {
@@ -524,13 +661,12 @@ async function searchPatients() {
 
 async function loadAppointments() {
     try {
-        const status = currentFilter === 'cancelled' ? 'declined' : currentFilter;
-        const url = status
-            ? `${API_BASE}/doctor/appointments?status=${status}`
+        const url = currentFilter
+            ? `${API_BASE}/doctor/appointments?status=${currentFilter}`
             : `${API_BASE}/doctor/appointments`;
 
         const response = await fetch(url, {
-            headers: { "X-Doctor-ID": doctorId }
+            headers: getDoctorAuthHeaders()
         });
 
         if (!response.ok) {
@@ -549,16 +685,17 @@ async function loadAppointments() {
 }
 
 function displayAppointments(appointments) {
+    // Ensure appointments is an array
+    const appointmentsArray = Array.isArray(appointments) ? appointments : [];
     const now = new Date();
-    // Exclude declined appointments from view (kept in database for audit trail)
-    // Exclude approved appointments that have passed
-    const filtered = appointments.filter(apt => {
-        if (apt.status === 'declined') return false;
-        if (apt.status === 'approved' && new Date(apt.appointment_date) < now) return false;
+    const filtered = appointmentsArray.filter(apt => {
+        // Only show this status type if viewing that filter
+        if (apt.status !== currentFilter) return false;
         return true;
     });
 
     const container = document.getElementById("appointmentsContainer");
+    if (!container) return;
 
     if (filtered.length === 0) {
         container.innerHTML = "<p>No appointments found</p>";
@@ -600,7 +737,7 @@ async function loadHistory() {
         const url = `${API_BASE}/doctor/appointments?status=approved`;
 
         const response = await fetch(url, {
-            headers: { "X-Doctor-ID": doctorId }
+            headers: getDoctorAuthHeaders()
         });
 
         if (!response.ok) {
@@ -618,7 +755,6 @@ async function loadHistory() {
 
 function displayHistory(appointments) {
     const now = new Date();
-    // Filter approved appointments where date has passed
     const history = appointments.filter(apt => new Date(apt.appointment_date) < now);
 
     const container = document.getElementById("historyContainer");
@@ -629,7 +765,7 @@ function displayHistory(appointments) {
     }
 
     container.innerHTML = history.map(apt => `
-    < div class= "appointment-card history-card" onclick = "openHistoryDetails(${apt.id})" >
+        <div class="appointment-card history-card" onclick="openHistoryDetails(${apt.id})">
             <div class="card-header">
                 <div class="card-title">${apt.patient_name}</div>
                 <div class="card-status status-completed">COMPLETED</div>
@@ -648,8 +784,8 @@ function displayHistory(appointments) {
                     <span>${apt.patient_phone || "N/A"}</span>
                 </div>
             </div>
-        </div >
-        `).join("");
+        </div>
+    `).join("");
 }
 
 function openHistoryDetails(appointmentId) {
@@ -824,8 +960,11 @@ async function createConsultationNote(patientId, observations) {
             })
         });
 
+        const data = await response.json();
         if (response.ok) {
             showAlert("Consultation note created!", "success");
+        } else {
+            showAlert(data.message || "Error creating note", "error");
         }
     } catch (error) {
         console.error("Error creating consultation note:", error);
@@ -845,67 +984,137 @@ async function handleCreatePrescriptionForPatient(event) {
         return;
     }
 
-    const refillDate = document.getElementById("rxRefillDate").value;
+    const prescriptionType = document.querySelector('input[name="prescriptionType"]:checked').value;
+    const medicationName = document.getElementById("rxMedicationName").value;
+    const dosage = document.getElementById("rxDosage").value;
+    const frequency = document.getElementById("rxFrequency").value;
+    const notes = document.getElementById("rxNotes").value;
+
     const todayDate = new Date().toISOString().split('T')[0];
-    if (refillDate < todayDate) {
-        showAlert("Refill date cannot be in the past", "error");
-        return;
-    }
 
-    const prescriptionData = {
-        patient_id: currentPatientId,
-        medication_name: document.getElementById("rxMedicationName").value,
-        dosage: document.getElementById("rxDosage").value,
-        frequency: document.getElementById("rxFrequency").value,
-        refill_date: refillDate,
-        notes: document.getElementById("rxNotes").value
-    };
+    // Validate based on prescription type
+    if (prescriptionType === "short-term") {
+        const endDate = document.getElementById("rxEndDate").value;
 
-    try {
-        const response = await fetch(`${API_BASE}/doctor/prescriptions`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Doctor-ID": doctorId
-            },
-            body: JSON.stringify(prescriptionData)
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            showAlert("Prescription created and sent to patient!", "success");
-            document.getElementById("patientPrescriptionForm").reset();
-            // Refresh patient details modal to show new prescription
-            if (currentPatientId) {
-                const patientResponse = await fetch(`${API_BASE}/doctor/patients/${currentPatientId}`, {
-                    headers: { "X-Doctor-ID": doctorId }
-                });
-                if (patientResponse.ok) {
-                    const data = await patientResponse.json();
-                    displayPatientDetailsModal(data);
-                }
-            }
-        } else {
-            showAlert(data.message || "Error creating prescription", "error");
+        if (!endDate) {
+            showAlert("End date is required for short-term prescriptions", "error");
+            return;
         }
-    } catch (error) {
-        console.error("Error creating prescription:", error);
-        showAlert("Error creating prescription: " + error.message, "error");
+
+        if (endDate < todayDate) {
+            showAlert("End date cannot be in the past", "error");
+            return;
+        }
+
+        // Create short-term prescription (with end_date)
+        const prescriptionData = {
+            patient_id: currentPatientId,
+            medication_name: medicationName,
+            dosage: dosage,
+            frequency: frequency,
+            end_date: endDate,
+            notes: notes,
+            prescription_type: "short-term"
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/doctor/prescriptions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Doctor-ID": doctorId
+                },
+                body: JSON.stringify(prescriptionData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert("Short-term prescription created successfully!", "success");
+                document.getElementById("patientPrescriptionForm").reset();
+                // Refresh patient details modal to show new prescription
+                if (currentPatientId) {
+                    const patientResponse = await fetch(`${API_BASE}/doctor/patients/${currentPatientId}`, {
+                        headers: { "X-Doctor-ID": doctorId }
+                    });
+                    if (patientResponse.ok) {
+                        const data = await patientResponse.json();
+                        displayPatientDetailsModal(data);
+                    }
+                }
+            } else {
+                showAlert(data.message || "Error creating prescription", "error");
+            }
+        } catch (error) {
+            console.error("Error creating prescription:", error);
+            showAlert("Error creating prescription: " + error.message, "error");
+        }
+
+    } else {
+        // Long-term prescription
+        const refillDate = document.getElementById("rxRefillDate").value;
+
+        if (!refillDate) {
+            showAlert("Refill date is required for long-term prescriptions", "error");
+            return;
+        }
+
+        if (refillDate < todayDate) {
+            showAlert("Refill date cannot be in the past", "error");
+            return;
+        }
+
+        // Create long-term prescription (with refill_date)
+        const prescriptionData = {
+            patient_id: currentPatientId,
+            medication_name: medicationName,
+            dosage: dosage,
+            frequency: frequency,
+            refill_date: refillDate,
+            notes: notes,
+            prescription_type: "long-term"
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/doctor/prescriptions`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Doctor-ID": doctorId
+                },
+                body: JSON.stringify(prescriptionData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert("Long-term prescription created successfully!", "success");
+                document.getElementById("patientPrescriptionForm").reset();
+                // Refresh patient details modal to show new prescription
+                if (currentPatientId) {
+                    const patientResponse = await fetch(`${API_BASE}/doctor/patients/${currentPatientId}`, {
+                        headers: { "X-Doctor-ID": doctorId }
+                    });
+                    if (patientResponse.ok) {
+                        const data = await patientResponse.json();
+                        displayPatientDetailsModal(data);
+                    }
+                }
+            } else {
+                showAlert(data.message || "Error creating prescription", "error");
+            }
+        } catch (error) {
+            console.error("Error creating prescription:", error);
+            showAlert("Error creating prescription: " + error.message, "error");
+        }
     }
 }
 
 async function removePrescription(prescriptionId) {
-    console.log("removePrescription called with ID:", prescriptionId);
-
-    // Use custom confirm dialog instead of browser confirm
     const confirmed = await showConfirmDialog("Remove this prescription?");
     if (!confirmed) {
-        console.log("Remove prescription cancelled");
         return;
     }
-
-    console.log("Proceeding with prescription removal");
 
     try {
         const response = await fetch(`${API_BASE}/doctor/prescriptions/${prescriptionId}/discontinue`, {
@@ -913,12 +1122,8 @@ async function removePrescription(prescriptionId) {
             headers: { "X-Doctor-ID": doctorId }
         });
 
-        console.log("Remove prescription response status:", response.status);
-
         if (response.ok) {
             showAlert("Prescription removed", "success");
-            console.log("Prescription removed successfully, refreshing patient details");
-
             if (currentPatientId) {
                 const patientResponse = await fetch(`${API_BASE}/doctor/patients/${currentPatientId}`, {
                     headers: { "X-Doctor-ID": doctorId }

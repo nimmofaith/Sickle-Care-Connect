@@ -8,14 +8,10 @@
   <link rel="stylesheet" href="style.css">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <script src="session.js"></script>
 
   <script>
-    const userId = localStorage.getItem("user_id");
-    if (!userId) {
-      alert("You must be logged in to access this page");
-      window.location.href = "sign in.html";
-    }
+    ensurePatientSession('sign in.html');
   </script>
 
 </head>
@@ -75,109 +71,57 @@
     </div>
 
     <div id="hospitalList">
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Nakuru County Referral & Teaching Hospital</h2>
-        <p><strong>City:</strong> <span class="city">Nakuru</span></p>
-        <p><strong>Location:</strong> Along Hospital Road, near Nyayo Gardens</p>
-        <p><strong>Service:</strong> Dedicated Haemophilia & Sickle Cell Care Unit</p>
-        <p><strong>Notes:</strong> 24-hour clinic for sickle cell patients</p>
-        <p><strong>Doctor:</strong> Dr. Karen Wanja</p>
-        <a href="book appointment.html?hospital=Nakuru County Referral & Teaching Hospital&doctor=Dr. Karen Wanja&doctor_id=1"
-          class="booking">Book Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Mediheal Hospital Nakuru</h2>
-        <p><strong>City:</strong> <span class="city">Nakuru</span></p>
-        <p><strong>Location:</strong> Kenyatta Avenue, opposite Westside Mall</p>
-        <p><strong>Service:</strong> Hematology Support</p>
-        <p><strong>Notes:</strong> Private hospital</p>
-        <p><strong>Doctor:</strong> Dr. Janice Njeri</p>
-        <a href="book appointment.html?hospital=Mediheal Hospital Nakuru&doctor=Dr. Janice Njeri&doctor_id=2"
-          class="booking">Book
-          Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Naivasha County Referral Hospital</h2>
-        <p><strong>City:</strong> <span class="city">Nakuru</span></p>
-        <p><strong>Location:</strong> Moi South Lake Road, near Naivasha Stadium</p>
-        <p><strong>Service:</strong> Referral Care</p>
-        <p><strong>Notes:</strong> Level 5 facility</p>
-        <p><strong>Doctor:</strong> Dr.Patricia Ombuya</p>
-        <a href="book appointment.html?hospital=Naivasha County Referral Hospital&doctor=Dr.Patricia Ombuya&doctor_id=3"
-          class="booking">Book
-          Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Rhein-Valley Hospital</h2>
-        <p><strong>City:</strong> <span class="city">Nakuru</span></p>
-        <p><strong>Location:</strong> Pipeline area, off Nairobi–Nakuru Highway</p>
-        <p><strong>Service:</strong> Community Care</p>
-        <p><strong>Notes:</strong> NGO hospital</p>
-        <p><strong>Doctor:</strong> Dr. Simon Okelo</p>
-        <a href="book appointment.html?hospital=Rhein-Valley Hospital&doctor=Dr. Simon Okelo&doctor_id=4"
-          class="booking">Book
-          Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>St. Mary’s Mission Hospital Gilgil</h2>
-        <p><strong>City:</strong> <span class="city">Nakuru</span></p>
-        <p><strong>Location:</strong> Gilgil town, along Nairobi–Nakuru Highway</p>
-        <p><strong>Service:</strong> Supportive Care</p>
-        <p><strong>Notes:</strong> Mission hospital</p>
-        <p><strong>Doctor:</strong> Dr. Kate Maina</p>
-        <a href="book appointment.html?hospital=St. Mary's Mission Hospital Gilgil&doctor=Dr. Kate Maina&doctor_id=5"
-          class="booking">Book Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Aga Khan University Hospital</h2>
-        <p><strong>City:</strong> <span class="city">Nairobi</span></p>
-        <p><strong>Location:</strong> 3rd Parklands Avenue, near Diamond Plaza</p>
-        <p><strong>Service:</strong> Specialized Hematology & Sickle Cell Management</p>
-        <p><strong>Notes:</strong> Tertiary hospital</p>
-        <p><strong>Doctor:</strong> Dr. Patel Shiv</p>
-        <a href="book appointment.html?hospital=Aga Khan University Hospital&doctor=Dr. Patel Shiv&doctor_id=6"
-          class="booking">Book Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Comprehensive Sickle Cell Management Center</h2>
-        <p><strong>City:</strong> <span class="city">Nairobi</span></p>
-        <p><strong>Location:</strong> Eastleigh, near Pumwani Maternity Hospital</p>
-        <p><strong>Service:</strong> Dedicated SCD Management</p>
-        <p><strong>Notes:</strong> NGO-based, focused on children</p>
-        <p><strong>Doctor:</strong> Dr. Michael Njoroge</p>
-        <a href="book appointment.html?hospital=Comprehensive Sickle Cell Management Center&doctor=Dr. Michael Njoroge&doctor_id=7"
-          class="booking">Book Appointment</a>
-      </div>
-
-      <div class="hospital-card">
-        <h2><i class="fa-solid fa-hospital icon"></i>Mbagathi County Referral Hospital</h2>
-        <p><strong>City:</strong> <span class="city">Nairobi</span></p>
-        <p><strong>Location:</strong> Mbagathi Way, next to Kenyatta Market</p>
-        <p><strong>Service:</strong> Sickle Cell Afya Dhabiti Program</p>
-        <p><strong>Notes:</strong> Public hospital</p>
-        <p><strong>Doctor:</strong> Dr. Alice Mbatia</p>
-        <a href="book appointment.html?hospital=Mbagathi County Referral Hospital&doctor=Dr. Alice Mbatia&doctor_id=8"
-          class="booking">Book Appointment</a>
-      </div>
+      <!-- Hospitals will be loaded dynamically -->
     </div>
     <script>
-      function searchHospital() {
-        const input = document.getElementById("searchInput").value.toLowerCase();
-        const cards = document.querySelectorAll(".hospital-card");
+      async function loadHospitals(search = '') {
+        const hospitalList = document.getElementById('hospitalList');
+        hospitalList.innerHTML = '<div class="loading">Loading hospitals...</div>';
 
-        cards.forEach(card => {
-          const city = card.querySelector(".city").textContent.toLowerCase();
-          card.style.display = city.includes(input) ? "block" : "none";
-        });
+        try {
+          const response = await fetch(`http://localhost:5000/hospitals?search=${encodeURIComponent(search)}`);
+          const hospitals = await response.json();
+
+          hospitalList.innerHTML = '';
+
+          if (hospitals.length === 0) {
+            hospitalList.innerHTML = '<p>No hospitals found.</p>';
+            return;
+          }
+
+          hospitals.forEach(hospital => {
+            const card = document.createElement('div');
+            card.className = 'hospital-card';
+
+            const doctorsText = hospital.doctors.length > 0 ? hospital.doctors.join(', ') : 'No doctors assigned';
+
+            card.innerHTML = `
+              <h2><i class="fa-solid fa-hospital icon"></i>${hospital.name}</h2>
+              <p><strong>City:</strong> <span class="city">${hospital.city}</span></p>
+              <p><strong>Location:</strong> ${hospital.location}</p>
+              <p><strong>Service:</strong> ${hospital.service}</p>
+              <p><strong>Notes:</strong> ${hospital.notes || ''}</p>
+              <p><strong>Doctor:</strong> ${doctorsText}</p>
+              <a href="book appointment.html?hospital=${encodeURIComponent(hospital.name)}&doctor=${encodeURIComponent(hospital.doctors[0] || '')}&doctor_id=${hospital.first_doctor_id || ''}" class="booking">Book Appointment</a>
+            `;
+
+            hospitalList.appendChild(card);
+          });
+        } catch (error) {
+          hospitalList.innerHTML = '<div class="error-message">Error loading hospitals</div>';
+          console.error('Error loading hospitals:', error);
+        }
       }
 
+      function searchHospital() {
+        const input = document.getElementById("searchInput").value;
+        loadHospitals(input);
+      }
+
+      // Load hospitals on page load
+      document.addEventListener('DOMContentLoaded', function () {
+        loadHospitals();
+      });
     </script>
     <script src="navigation.js"></script>
 

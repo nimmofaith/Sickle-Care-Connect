@@ -54,7 +54,7 @@
     <!-- Welcome Section -->
     <section class="intro">
         <h2 id="welcomeMessage">Welcome to Your Sickle Care Dashboard</h2>
-        <p>Manage your health, track your symptoms, and connect with resources all in one place.</p>
+        <p>Manage your health, track your appointments, and connect with resources all in one place.</p>
     </section>
 
     <!-- ===== HEALTH SUMMARY CARD ===== -->
@@ -77,12 +77,17 @@
                 <p id="nextAppointment">Not scheduled</p>
             </div>
         </div>
+
+    </section>
+    <section class="profile-cta">
+        <a href="profile.html" class="btn-primary">My Profile</a>
     </section>
 
     <!-- ===== APPOINTMENT CALENDAR ===== -->
     <section class="appointments">
         <h3>Upcoming Appointments</h3>
         <div class="appointment-list">
+            <p>No appointments yet</p>
         </div>
         <div style="margin-top: 15px;">
             <a href="findcare2.html" class="btn-secondary">+ Add Appointment</a>
@@ -99,40 +104,17 @@
                         <th>Medication Name</th>
                         <th>Dosage</th>
                         <th>Frequency</th>
-                        <th>Duration</th>
+                        <th>Instruction</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
-
                 <tbody id="medication-list"></tbody>
-
             </table>
-            <div class="medication-list"></div>
         </div>
         <p style="color: #666; font-style: italic;">Medications are managed by your doctor.</p>
-
     </section>
 
-    <!-- ===== MEDICAL RECORDS ===== -->
-    <section class="medical-profile">
-        <h4>Your Medical Profile</h4>
-
-        <form id="profileForm">
-            <input type="text" id="genotypeInput" placeholder="Genotype (e.g. SS)">
-            <input type="text" id="bloodTypeInput" placeholder="Blood Type (e.g. O+)">
-            <input type="text" id="allergiesInput" placeholder="Allergies">
-            <input type="text" id="complicationsInput" placeholder="Complications">
-
-            <button type="submit" class="btn">Save Profile</button>
-        </form>
-
-        <div class="profile-card">
-            <p><strong>Genotype:</strong> <span id="genotypeDisplay"></span></p>
-            <p><strong>Blood Type:</strong> <span id="bloodTypeDisplay"></span></p>
-            <p><strong>Allergies:</strong> <span id="allergiesDisplay"></span></p>
-            <p><strong>Complications:</strong> <span id="complicationsDisplay"></span></p>
-        </div>
-    </section>
-
+    <script src="session.js"></script>
     <script src="dashboard.js"></script>
     <script src="navigation.js"></script>
 </body>

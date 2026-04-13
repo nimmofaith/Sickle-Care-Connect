@@ -10,7 +10,8 @@
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">  
+</head>
 
 </head>
 
@@ -59,8 +60,8 @@
             // Check login for Find Care
             const findCareLink = document.getElementById('findCareLink');
             findCareLink.addEventListener('click', function (e) {
-                const userId = localStorage.getItem('user_id');
-                if (!userId) {
+                const patientId = localStorage.getItem('patient_id');
+                if (!patientId) {
                     e.preventDefault();
                     alert('Please log in to access Find Care.');
                     window.location.href = 'login.html';
@@ -88,7 +89,7 @@
     </section>
     <section class="article-section">
         <a href="awareness.html" class="article-card">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRCKjCjPFNZuXA0qwngJOf8Vt69CWHA_M8wMw&s"
+            <img src="images/awareness article.jpeg"
                 alt="Awareness Articles">
             <div class="card-content">
                 <h3>Awareness Articles</h3>

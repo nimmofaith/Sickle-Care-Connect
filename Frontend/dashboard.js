@@ -1,70 +1,102 @@
 // ===============================
 // SAFE AUTH CHECK
 // ===============================
-const userId = localStorage.getItem("user_id");
+const patientId = localStorage.getItem("patient_id");
 
-if (!userId) {
-    alert("User not logged in");
-    window.location.href = "sign in.html";
+if (!ensurePatientSession('login.html')) {
+    // If session is missing or expired, ensurePatientSession will redirect.
+    throw new Error('Session expired or missing');
 }
 
-// simple user object
-const user = { id: userId };
+const user = { id: patientId };
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('patient_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+function getHiddenRescheduleAppointments() {
+    try {
+        const raw = localStorage.getItem('hidden_reschedule_appointments');
+        return raw ? JSON.parse(raw) : [];
+    } catch {
+        return [];
+    }
+}
+
+function addHiddenRescheduleAppointment(appointmentId) {
+    const hidden = getHiddenRescheduleAppointments();
+    if (!hidden.includes(appointmentId)) {
+        hidden.push(appointmentId);
+        localStorage.setItem('hidden_reschedule_appointments', JSON.stringify(hidden));
+    }
+}
 
 
 // ===============================
 // DOM ELEMENTS
 // ===============================
+
 const medForm = document.getElementById('medForm');
 const profileForm = document.getElementById('profileForm');
+const profileDisplayGuard = document.getElementById('nameDisplay');
 
 
 // ===============================
 // LOGOUT
 // ===============================
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
-    localStorage.removeItem("user_id");
+    localStorage.removeItem("patient_id");
+    localStorage.removeItem("patient_token");
     window.location.href = 'sign in.html';
 });
 
 
 // ===============================
-// AUTO-DELETE PAST APPOINTMENTS
+// AUTO-COMPLETE PAST APPROVED APPOINTMENTS
 // ===============================
-async function autoDeletePastAppointments() {
+async function autoCompletePastAppointments() {
+    if (!user.id) return;
     try {
-        const res = await fetch(`http://127.0.0.1:5000/appointments/${user.id}`);
-        if (!res.ok) return;
-
-        const allAppointments = await res.json();
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-
-        for (const appt of allAppointments) {
-            if (appt.preferred_date < today) {
-                // Auto-delete past appointment silently
-                await fetch(`http://127.0.0.1:5000/appointments`, {
-                    method: "DELETE",
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ appointment_id: appt.id })
-                });
+        await fetch(`http://127.0.0.1:5000/appointments/complete-past/${user.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
             }
-        }
+        });
     } catch (err) {
-        console.error("Error auto-deleting past appointments:", err);
+        console.error("Error auto-completing past appointments:", err);
     }
 }
 
+
+function showAlert(message, type = 'error') {
+    const toast = document.createElement('div');
+    toast.className = `alert-toast alert-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
 
 // ===============================
 // DASHBOARD 
 // ===============================
 async function loadDashboard() {
     try {
-        // Auto-delete past appointments first
-        await autoDeletePastAppointments();
+        // Auto-complete past approved appointments first
+        await autoCompletePastAppointments();
 
         // Load past appointments for last checkup
-        const pastRes = await fetch(`http://127.0.0.1:5000/appointments/past/${user.id}`);
+        const pastRes = await fetch(`http://127.0.0.1:5000/appointments/past/${user.id}`, {
+            headers: {
+                ...getAuthHeaders()
+            }
+        });
         if (pastRes.ok) {
             const pastData = await pastRes.json();
             if (pastData.length > 0) {
@@ -79,61 +111,164 @@ async function loadDashboard() {
         // Med count and next appointment are updated in their respective functions
     } catch (err) {
         console.error("Dashboard error:", err);
+        showAlert("Unable to load dashboard data.", 'error');
     }
 }
 
 
 // ===============================
-// ADD MEDICATION - DISABLED
+// UNIFIED PRESCRIPTION LOGIC
 // ===============================
-// Medications are now managed by doctors only
-// Patients cannot add their own medications
 
+/**
+ * Calculate computed status (NOT stored as "Overdue")
+ * - Discontinued → "Discontinued"
+ * - Active + end_date passed → "Completed"
+ * - Otherwise → "Active"
+ */
+function calculatePrescriptionStatus(prescription) {
+    if (prescription.status === 'discontinued') {
+        return 'discontinued';
+    }
+
+    if (prescription.status === 'active' && prescription.end_date) {
+        if (new Date(prescription.end_date) <= new Date()) {
+            return 'completed';
+        }
+    }
+
+    return prescription.status === 'active' ? 'active' : prescription.status;
+}
+
+/**
+ * Check if prescription is overdue (NEVER stored, only calculated)
+ * Overdue = has refill_date AND today > refill_date AND status is active
+ */
+function isPrescriptionOverdue(prescription) {
+    if (!prescription.refill_date || prescription.status === 'discontinued' || prescription.status === 'completed') {
+        return false;
+    }
+
+    const computedStatus = calculatePrescriptionStatus(prescription);
+    if (computedStatus !== 'active') {
+        return false;
+    }
+
+    return new Date() > new Date(prescription.refill_date);
+}
+
+/**
+ * Get human-readable instruction (NEVER stored, only computed)
+ * - If end_date: "Take until {date}"
+ * - If refill_date + not overdue: "Refill due {date}"
+ * - If refill_date + overdue: "⚠ Refill overdue"
+ * - If discontinued: "Discontinued"
+ * - Otherwise: "As needed"
+ */
+function getInstructionDisplay(prescription) {
+    if (prescription.status === 'discontinued') {
+        return 'Discontinued';
+    }
+
+    if (prescription.end_date) {
+        const endDate = new Date(prescription.end_date);
+        return `Take until ${endDate.toLocaleDateString()}`;
+    }
+
+    if (prescription.refill_date) {
+        if (isPrescriptionOverdue(prescription)) {
+            return '⚠ Refill overdue';
+        }
+        const refillDate = new Date(prescription.refill_date);
+        return `Refill due ${refillDate.toLocaleDateString()}`;
+    }
+
+    return 'As needed';
+}
 
 // ===============================
-// LOAD PRESCRIPTIONS 
+// LOAD PRESCRIPTIONS (PATIENT VIEW)
 // ===============================
 async function loadMedications() {
     try {
-        const res = await fetch(`http://127.0.0.1:5000/prescriptions/${user.id}`);
+        const res = await fetch(`http://127.0.0.1:5000/prescriptions/${user.id}`, {
+            headers: {
+                ...getAuthHeaders()
+            }
+        });
 
         if (!res.ok) {
             console.error("Prescription fetch failed:", res.status);
+            document.getElementById('medCount').innerText = `0 active medications`;
             return;
         }
 
         const data = await res.json();
 
+        // Ensure data is an array
+        const prescriptionsArray = Array.isArray(data) ? data : [];
+
         // Sort by id descending to show latest first
-        data.sort((a, b) => b.id - a.id);
+        prescriptionsArray.sort((a, b) => b.id - a.id);
 
         const container = document.getElementById("medication-list");
         if (!container) return;
 
+        // Filter: only show active prescriptions
+        const activePrescriptions = prescriptionsArray.filter(m => calculatePrescriptionStatus(m) === 'active');
+
         container.innerHTML = "";
 
-        if (!Array.isArray(data) || data.length === 0) {
-            container.innerHTML = "<p>No prescriptions yet</p>";
+        if (activePrescriptions.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 20px; color: #666;">No active medications</td>
+                </tr>
+            `;
+            document.getElementById('medCount').innerText = `0 active medications`;
             return;
         }
 
-        data.forEach(m => {
-            container.innerHTML += `
-        <tr>
-            <td>${m.medication_name || ""}</td>
-            <td>${m.dosage || ""}</td>
-            <td>${m.frequency || ""}</td>
-            <td>${m.duration || ""}</td>
-        </tr>
-        ${m.notes ? `<tr class="notes-row"><td colspan="4" class="notes-cell"><strong>Notes:</strong> ${m.notes}</td></tr>` : ''}
-       `;
+        activePrescriptions.forEach(m => {
+            const instruction = m.duration || getInstructionDisplay(m);
+            const isOverdue = isPrescriptionOverdue(m);
+            const statusDisplay = isOverdue ? 'Overdue' : 'Active';
+            const instructionHtml = isOverdue
+                ? `<span style="color: #ff6b6b; font-weight: 600;">${instruction}</span>`
+                : instruction;
+
+            // Main medication row
+            const rowHtml = `
+                <tr>
+                    <td>${m.medication_name || ""}</td>
+                    <td>${m.dosage || ""}</td>
+                    <td>${m.frequency || ""}</td>
+                    <td>${instructionHtml}</td>
+                    <td>${statusDisplay}</td>
+                </tr>
+            `;
+
+            container.innerHTML += rowHtml;
+
+            // Notes row for this specific medication (only if notes exist)
+            if (m.notes && m.notes.trim()) {
+                const notesRowHtml = `
+                    <tr style="background-color: #f9f7f4;">
+                        <td colspan="5" style="padding: 8px 12px; font-size: 13px; color: #666; border-top: none;">
+                            <strong style="color: #800000;">Notes:</strong> ${m.notes}
+                        </td>
+                    </tr>
+                `;
+                container.innerHTML += notesRowHtml;
+            }
         });
 
-        // Update med count
-        document.getElementById('medCount').innerText = `${data.length} medications`;
+        document.getElementById('medCount').innerText = `${activePrescriptions.length} active medications`;
 
     } catch (err) {
         console.error("Error loading prescriptions:", err);
+        document.getElementById('medCount').innerText = `0 active medications`;
+        showAlert("Unable to load medication data.", 'error');
     }
 }
 
@@ -143,7 +278,11 @@ async function loadMedications() {
 // ===============================
 async function loadAppointments() {
     try {
-        const res = await fetch(`http://127.0.0.1:5000/appointments/upcoming/${user.id}`);
+        const res = await fetch(`http://127.0.0.1:5000/appointments/upcoming/${user.id}`, {
+            headers: {
+                ...getAuthHeaders()
+            }
+        });
 
         if (!res.ok) {
             console.error("Appointments fetch failed:", res.status);
@@ -152,25 +291,29 @@ async function loadAppointments() {
 
         const data = await res.json();
 
+        // Ensure data is an array
+        const appointmentsArray = Array.isArray(data) ? data : [];
+        const hiddenIds = getHiddenRescheduleAppointments();
+        const visibleAppointments = appointmentsArray.filter(a => !hiddenIds.includes(a.id));
+
         const container = document.querySelector(".appointment-list");
         if (!container) return;
 
         container.innerHTML = "";
 
-        if (!data || data.length === 0) {
-            container.innerHTML = "<p>No appointments yet</p>";
+        if (visibleAppointments.length === 0) {
+            container.innerHTML = "<p>No upcoming appointments</p>";
             return;
         }
 
-        data.forEach(a => {
+        visibleAppointments.forEach(a => {
             let actions = "";
-            let statusDisplay = a.status;
+            let statusDisplay = a.status || "pending";
 
             if (a.status === "declined") {
                 statusDisplay = `<span style="color: red;">Declined${a.notes ? `: ${a.notes}` : ''}</span>`;
                 actions = `<button onclick="rescheduleAppointment(${a.id}, '${encodeURIComponent(a.doctor)}', '${encodeURIComponent(a.hospital)}', '${a.preferred_date}', '${a.preferred_time}', '${a.doctor_id}')">Reschedule</button>`;
             } else if (a.status === "cancelled") {
-                // Cancelled by patient should not show in upcoming (filtered backend), but just in case
                 statusDisplay = `<span style="color: red;">Cancelled by patient</span>`;
                 actions = "";
             } else {
@@ -188,10 +331,10 @@ async function loadAppointments() {
             `;
         });
 
-        // Update next appointment (only if approved or pending)
-        const upcomingApproved = data.filter(a => a.status !== "declined");
-        if (upcomingApproved.length > 0) {
-            const next = upcomingApproved[0]; // Assuming sorted by date
+        // Update next appointment using only visible upcoming appointments that are not final
+        const upcomingVisible = visibleAppointments.filter(a => a.status !== "declined" && a.status !== "cancelled");
+        if (upcomingVisible.length > 0) {
+            const next = upcomingVisible[0];
             document.getElementById('nextAppointment').innerText = `${next.preferred_date} with ${next.doctor}`;
         } else {
             document.getElementById('nextAppointment').innerText = "Not scheduled";
@@ -199,6 +342,7 @@ async function loadAppointments() {
 
     } catch (err) {
         console.error("Error loading appointments:", err);
+        showAlert("Unable to load appointment data.", 'error');
     }
 }
 
@@ -207,28 +351,18 @@ async function loadAppointments() {
 // RESCHEDULE APPOINTMENT
 // ===============================
 async function rescheduleAppointment(id, doctor, hospital, date, time, doctorId) {
-    if (!confirm("This will cancel the declined appointment and open booking with the same doctor. Proceed?")) return;
+    if (!confirm("This will remove the declined appointment from your dashboard and open booking with the same doctor. Proceed?")) return;
 
-    try {
-        // Cancel old declined appointment
-        await fetch(`http://127.0.0.1:5000/appointments`, {
-            method: "DELETE",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ appointment_id: id })
-        });
+    addHiddenRescheduleAppointment(id);
 
-        // Save prefill values to make rebooking easier
-        localStorage.setItem('reschedule_hospital', decodeURIComponent(hospital));
-        localStorage.setItem('reschedule_doctor', decodeURIComponent(doctor));
-        localStorage.setItem('reschedule_doctor_id', doctorId);
-        localStorage.setItem('reschedule_date', date);
-        localStorage.setItem('reschedule_time', time);
+    // Save prefill values to make rebooking easier
+    localStorage.setItem('reschedule_hospital', decodeURIComponent(hospital));
+    localStorage.setItem('reschedule_doctor', decodeURIComponent(doctor));
+    localStorage.setItem('reschedule_doctor_id', doctorId);
+    localStorage.setItem('reschedule_date', date);
+    localStorage.setItem('reschedule_time', time);
 
-        window.location.href = `book appointment.html?hospital=${hospital}&doctor=${doctor}&doctor_id=${doctorId}`;
-    } catch (err) {
-        console.error(err);
-        alert('Failed to reschedule appointment');
-    }
+    window.location.href = `book appointment.html?hospital=${hospital}&doctor=${doctor}&doctor_id=${doctorId}`;
 }
 
 
@@ -241,7 +375,10 @@ async function cancelAppointment(id) {
     try {
         const res = await fetch(`http://127.0.0.1:5000/appointments`, {
             method: "DELETE",
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
             body: JSON.stringify({ appointment_id: id })
         });
 
@@ -260,8 +397,14 @@ async function cancelAppointment(id) {
 // LOAD PROFILE 
 // ===============================
 async function loadProfile() {
+    if (!profileDisplayGuard) return;
+
     try {
-        const res = await fetch(`http://127.0.0.1:5000/profile/${user.id}`);
+        const res = await fetch(`http://127.0.0.1:5000/profile/${user.id}`, {
+            headers: {
+                ...getAuthHeaders()
+            }
+        });
 
         if (!res.ok) {
             console.error("Profile fetch failed:", res.status);
@@ -270,6 +413,8 @@ async function loadProfile() {
 
         const data = await res.json();
 
+        document.getElementById('nameDisplay').innerText = data.name || "Unknown";
+        document.getElementById('emailDisplay').innerText = data.email || "Unknown";
         document.getElementById('genotypeDisplay').innerText = data.genotype || "Not recorded";
         document.getElementById('bloodTypeDisplay').innerText = data.blood_type || "Not recorded";
         document.getElementById('allergiesDisplay').innerText = data.allergies || "Not recorded";
@@ -289,7 +434,7 @@ if (profileForm) {
         e.preventDefault();
 
         const data = {
-            user_id: user.id,
+            patient_id: user.id,
             genotype: document.getElementById('genotypeInput').value,
             blood_type: document.getElementById('bloodTypeInput').value,
             allergies: document.getElementById('allergiesInput').value,
@@ -301,7 +446,10 @@ if (profileForm) {
         try {
             const res = await fetch('http://127.0.0.1:5000/profile', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                },
                 body: JSON.stringify(data)
             });
 

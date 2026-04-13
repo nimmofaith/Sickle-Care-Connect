@@ -30,8 +30,12 @@
         </nav>
     </header>
 
-    <section class="profile-section">
+    <section class="profile-section" style="position: relative;">
         <h2>My Profile</h2>
+        <div style="position: absolute; top: 50px; right: 50px; display: flex; gap: 10px;">
+            <button id="editProfileBtn" class="btn">Edit Profile</button>
+            <button id="changePasswordBtn" class="btn btn-secondary">Change Password</button>
+        </div>
         <div id="profileDisplay" class="profile-card">
             <!-- PERSONAL INFORMATION -->
             <h3>Personal Information</h3>
@@ -60,6 +64,14 @@
             <!-- MEDICAL INFORMATION -->
             <h3>Medical Information</h3>
             <div class="info-grid">
+                <div class="label">Genotype</div>
+                <div class="value"><span id="displayGenotype">-</span></div>
+                <div class="label">Blood Type</div>
+                <div class="value"><span id="displayBloodType">-</span></div>
+                <div class="label">Allergies</div>
+                <div class="value"><span id="displayAllergies">-</span></div>
+                <div class="label">Complications</div>
+                <div class="value"><span id="displayComplications">-</span></div>
                 <div class="label">Weight</div>
                 <div class="value"><span id="displayWeight">-</span> kg</div>
                 <div class="label">Height</div>
@@ -67,14 +79,14 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button id="editProfileBtn" class="btn">Edit Profile</button>
-        </div>
-
         <form id="profileForm" class="profile-form" style="display:none;">
             <input type="text" id="nameInput" placeholder="Name" required>
             <input type="email" id="emailInput" placeholder="Email" required>
-            <input type="date" id="dobInput" placeholder="Date of Birth" required>
+            <input type="date" id="dobInput" max="" placeholder="Date of Birth" required>
+            <input type="text" id="genotypeInput" placeholder="Genotype (e.g. SS)">
+            <input type="text" id="bloodTypeInput" placeholder="Blood Type (e.g. O+)">
+            <input type="text" id="allergiesInput" placeholder="Allergies">
+            <input type="text" id="complicationsInput" placeholder="Complications">
             <input type="number" id="weightInput" placeholder="Weight (kg)">
             <input type="number" id="heightInput" placeholder="Height (cm)">
             <input type="text" id="addressInput" placeholder="Address">
@@ -85,18 +97,34 @@
                 <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
             </div>
         </form>
+
+        <form id="passwordForm" class="profile-form" style="display:none; margin-top: 20px;">
+            <h3>Change Password</h3>
+            <input type="password" id="newPasswordInput" placeholder="New Password" required>
+            <input type="password" id="confirmPasswordInput" placeholder="Confirm New Password" required>
+            <div class="profile-buttons">
+                <button type="button" id="savePasswordBtn" class="btn">Save Password</button>
+                <button type="button" id="cancelPasswordBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
     </section>
 
+    <script src="session.js"></script>
     <script>
-        const userId = localStorage.getItem('user_id');
-        if (!userId) {
-            alert('Please login to access profile.');
-            window.location.href = 'sign in.html';
-        }
+        ensurePatientSession('sign in.html');
+
+        const patientId = localStorage.getItem('patient_id');
 
         const profileKeys = [
             'name', 'email', 'dob', 'address', 'phone', 'weight', 'height', 'emergency'
         ];
+
+        let medicalData = {};
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('patient_token');
+            return token ? { Authorization: `Bearer ${token}` } : {};
+        }
 
         function calcAge(dob) {
             if (!dob) return '-';
@@ -110,35 +138,63 @@
             return age >= 0 ? age : '-';
         }
 
-        function setDisplay(data) {
-            document.getElementById('displayName').innerText = data.name || '-';
-            document.getElementById('displayEmail').innerText = data.email || '-';
-            document.getElementById('displayDob').innerText = data.dob || '-';
-            document.getElementById('displayAge').innerText = calcAge(data.dob);
-            document.getElementById('displayAddress').innerText = data.address || '-';
-            document.getElementById('displayPhone').innerText = data.phone || '-';
-            document.getElementById('displayWeight').innerText = data.weight || '-';
-            document.getElementById('displayHeight').innerText = data.height || '-';
-            document.getElementById('displayEmergency').innerText = data.emergency || '-';
+        function setDisplay(personalData) {
+            document.getElementById('displayName').innerText = personalData.name || '-';
+            document.getElementById('displayEmail').innerText = personalData.email || '-';
+            document.getElementById('displayDob').innerText = personalData.dob || '-';
+            document.getElementById('displayAge').innerText = calcAge(personalData.dob);
+            document.getElementById('displayAddress').innerText = personalData.address || '-';
+            document.getElementById('displayPhone').innerText = personalData.phone || '-';
+            document.getElementById('displayWeight').innerText = personalData.weight || '-';
+            document.getElementById('displayHeight').innerText = personalData.height || '-';
+            document.getElementById('displayEmergency').innerText = personalData.emergency || '-';
+            // Medical
+            document.getElementById('displayGenotype').innerText = medicalData.genotype || '-';
+            document.getElementById('displayBloodType').innerText = medicalData.blood_type || '-';
+            document.getElementById('displayAllergies').innerText = medicalData.allergies || '-';
+            document.getElementById('displayComplications').innerText = medicalData.complications || '-';
         }
 
-        function bindForm(data) {
-            document.getElementById('nameInput').value = data.name || '';
-            document.getElementById('emailInput').value = data.email || '';
-            document.getElementById('dobInput').value = data.dob || '';
-            document.getElementById('addressInput').value = data.address || '';
-            document.getElementById('phoneInput').value = data.phone || '';
-            document.getElementById('weightInput').value = data.weight || '';
-            document.getElementById('heightInput').value = data.height || '';
-            document.getElementById('emergencyInput').value = data.emergency || '';
+        function bindForm(personalData) {
+            document.getElementById('nameInput').value = personalData.name || '';
+            document.getElementById('emailInput').value = personalData.email || '';
+            document.getElementById('dobInput').value = personalData.dob || '';
+            document.getElementById('genotypeInput').value = medicalData.genotype || '';
+            document.getElementById('bloodTypeInput').value = medicalData.blood_type || '';
+            document.getElementById('allergiesInput').value = medicalData.allergies || '';
+            document.getElementById('complicationsInput').value = medicalData.complications || '';
+            document.getElementById('addressInput').value = personalData.address || '';
+            document.getElementById('phoneInput').value = personalData.phone || '';
+            document.getElementById('weightInput').value = personalData.weight || '';
+            document.getElementById('heightInput').value = personalData.height || '';
+            document.getElementById('emergencyInput').value = personalData.emergency || '';
         }
 
-        const profileStorageKey = `profileData_${userId}`;
+        const profileStorageKey = `profileData_${patientId}`;
 
-        function loadProfile() {
-            const data = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
-            setDisplay(data);
-            bindForm(data);
+        async function loadMedicalProfile() {
+            try {
+                const res = await fetch(`http://127.0.0.1:5000/profile/${patientId}`, {
+                    headers: {
+                        ...getAuthHeaders()
+                    }
+                });
+                if (res.ok) {
+                    medicalData = await res.json();
+                } else {
+                    medicalData = {};
+                }
+            } catch (err) {
+                console.error('Error loading medical profile:', err);
+                medicalData = {};
+            }
+        }
+
+        async function loadProfile() {
+            await loadMedicalProfile();
+            const personalData = JSON.parse(localStorage.getItem(profileStorageKey) || '{}');
+            setDisplay(personalData);
+            bindForm(personalData);
         }
 
         // function resetProfile() {
@@ -150,7 +206,17 @@
 
         document.getElementById('editProfileBtn').addEventListener('click', () => {
             document.getElementById('profileForm').style.display = 'flex';
+            document.getElementById('passwordForm').style.display = 'none';
             document.getElementById('profileDisplay').style.display = 'none';
+            document.getElementById('changePasswordBtn').style.display = 'none';
+            document.getElementById('editProfileBtn').style.display = 'none';
+        });
+
+        document.getElementById('changePasswordBtn').addEventListener('click', () => {
+            document.getElementById('passwordForm').style.display = 'flex';
+            document.getElementById('profileForm').style.display = 'none';
+            document.getElementById('profileDisplay').style.display = 'none';
+            document.getElementById('changePasswordBtn').style.display = 'none';
             document.getElementById('editProfileBtn').style.display = 'none';
         });
 
@@ -163,12 +229,21 @@
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
             document.getElementById('profileForm').style.display = 'none';
+            document.getElementById('passwordForm').style.display = 'none';
             document.getElementById('profileDisplay').style.display = 'block';
             document.getElementById('editProfileBtn').style.display = 'inline-block';
+            document.getElementById('changePasswordBtn').style.display = 'inline-block';
         });
 
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            const profile = {
+        document.getElementById('cancelPasswordBtn').addEventListener('click', () => {
+            document.getElementById('passwordForm').style.display = 'none';
+            document.getElementById('profileDisplay').style.display = 'block';
+            document.getElementById('editProfileBtn').style.display = 'inline-block';
+            document.getElementById('changePasswordBtn').style.display = 'inline-block';
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const personalProfile = {
                 name: document.getElementById('nameInput').value.trim(),
                 email: document.getElementById('emailInput').value.trim(),
                 dob: document.getElementById('dobInput').value,
@@ -179,8 +254,42 @@
                 emergency: document.getElementById('emergencyInput').value.trim(),
             };
 
-            localStorage.setItem(profileStorageKey, JSON.stringify(profile));
-            setDisplay(profile);
+            const medicalProfile = {
+                patient_id: patientId,
+                genotype: document.getElementById('genotypeInput').value.trim(),
+                blood_type: document.getElementById('bloodTypeInput').value.trim(),
+                allergies: document.getElementById('allergiesInput').value.trim(),
+                complications: document.getElementById('complicationsInput').value.trim(),
+            };
+
+            // Save personal to localStorage
+            localStorage.setItem(profileStorageKey, JSON.stringify(personalProfile));
+
+            // Save medical to backend
+            try {
+                const res = await fetch('http://127.0.0.1:5000/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify(medicalProfile)
+                });
+                if (!res.ok) {
+                    alert('Error saving medical profile');
+                    return;
+                }
+                const result = await res.json();
+                alert(result.message);
+                // Reload medical data
+                await loadMedicalProfile();
+            } catch (err) {
+                console.error('Error saving medical profile:', err);
+                alert('Error saving medical profile');
+                return;
+            }
+
+            setDisplay(personalProfile);
 
             document.getElementById('profileForm').style.display = 'none';
             document.getElementById('profileDisplay').style.display = 'block';
@@ -189,7 +298,54 @@
             alert('Profile saved successfully.');
         });
 
-        loadProfile();
+        document.getElementById('savePasswordBtn').addEventListener('click', async () => {
+            const newPassword = document.getElementById('newPasswordInput').value.trim();
+            const confirmPassword = document.getElementById('confirmPasswordInput').value.trim();
+
+            if (!newPassword || !confirmPassword) {
+                alert('Please fill out both password fields.');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match.');
+                return;
+            }
+
+            try {
+                const res = await fetch('http://127.0.0.1:5000/profile/password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({ patient_id: patientId, new_password: newPassword, confirm_password: confirmPassword })
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    alert(result.message);
+                    document.getElementById('passwordForm').style.display = 'none';
+                    document.getElementById('profileDisplay').style.display = 'block';
+                    document.getElementById('editProfileBtn').style.display = 'inline-block';
+                    document.getElementById('changePasswordBtn').style.display = 'inline-block';
+                    document.getElementById('newPasswordInput').value = '';
+                    document.getElementById('confirmPasswordInput').value = '';
+                } else {
+                    alert(result.message || 'Error changing password');
+                }
+            } catch (err) {
+                console.error('Error changing password:', err);
+                alert('Error changing password');
+            }
+        });
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("dobInput").setAttribute("max", today);
+
+        (async () => {
+            await loadProfile();
+        })();
     </script>
     <script src="navigation.js"></script>
 </body>

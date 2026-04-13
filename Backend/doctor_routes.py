@@ -2,41 +2,83 @@ from flask import Blueprint, request, jsonify
 from db import db
 from models import (
     Doctor, Hospital, DoctorPatient, DoctorAppointment,
-    Prescription, ConsultationNote, User, MedicalProfile, Appointment
+    Prescription, ConsultationNote, Patient, MedicalProfile, Appointment
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from functools import wraps
+from jwt_utils import generate_token, verify_token, extract_token_from_header
 
 doctor_routes = Blueprint("doctor_routes", __name__, url_prefix="/doctor")
 
 # ==============================
-# Helper function to verify doctor authentication 
+# Helper function to verify doctor authentication
 # ==============================
 
 
 def verify_doctor(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        doctor_id_header = request.headers.get('X-Doctor-ID')
-        if not doctor_id_header:
-            return jsonify({"message": "Doctor ID required in headers"}), 401
+        if request.method == 'OPTIONS':
+            return jsonify({}), 200  # Allow preflight OPTIONS
+        
+        token = extract_token_from_header()
+        if not token:
+            return jsonify({"message": "Authorization header required"}), 401
 
-        try:
-            doctor_id = int(doctor_id_header)
-        except ValueError:
-            return jsonify({"message": "Invalid Doctor ID"}), 400
+        payload, error = verify_token(token)
+        if error:
+            return jsonify({"message": error}), 401
+        
+        # Check if user type is doctor
+        if payload.get('user_type') != 'doctor':
+            return jsonify({"message": "Invalid credentials"}), 401
 
-        doctor = Doctor.query.get(doctor_id)
-        if not doctor:
-            return jsonify({"message": "Doctor not found"}), 401
-
-        return f(doctor_id=doctor_id, *args, **kwargs)
+        return f(doctor_id=payload.get('user_id'), *args, **kwargs)
+    
     return decorated_function
 
 
 # ==============================
-# HOSPITAL MANAGEMENT 
+# DOCTOR AUTHENTICATION
+# ==============================
+
+@doctor_routes.route('/login', methods=['POST'])
+def doctor_login():
+    """Doctor login with email and password"""
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"message": "Email and password are required"}), 400
+
+    doctor = Doctor.query.filter_by(email=email).first()
+
+    if not doctor:
+        return jsonify({"message": "Doctor not found"}), 404
+
+    if not doctor.password:
+        return jsonify({"message": "Doctor account not registered. Please register using your email."}), 403
+
+    if not check_password_hash(doctor.password, password):
+        return jsonify({"message": "Invalid email or password"}), 401
+
+    # Generate JWT token
+    token = generate_token(doctor.id, 'doctor', doctor.email)
+
+    return jsonify({
+        "message": f"Welcome Dr. {doctor.name}!",
+        "doctor_id": doctor.id,
+        "doctor_name": doctor.name,
+        "specialization": doctor.specialization,
+        "hospital_id": doctor.hospital_id,
+        "token": token
+    }), 200
+
+
+# ==============================
+# HOSPITAL MANAGEMENT
 # ==============================
 
 @doctor_routes.route('/hospitals', methods=['GET'])
@@ -55,125 +97,13 @@ def get_hospitals():
 @doctor_routes.route('/hospitals', methods=['POST'])
 def create_hospital():
     """Create a new hospital (admin only)"""
-    data = request.get_json()
-    name = data.get('name')
-    address = data.get('address')
-    phone = data.get('phone')
-    city = data.get('city')
-    state = data.get('state')
-
-    if not all([name, address, phone, city, state]):
-        return jsonify({"message": "All fields required"}), 400
-
-    if Hospital.query.filter_by(name=name).first():
-        return jsonify({"message": "Hospital already exists"}), 400
-
-    new_hospital = Hospital(
-        name=name,
-        address=address,
-        phone=phone,
-        city=city,
-        state=state
-    )
-    db.session.add(new_hospital)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Hospital created successfully",
-        "hospital_id": new_hospital.id
-    }), 201
+    return jsonify({"message": "Hospital creation must be performed through the admin API at /admin/hospitals."}), 403
 
 
 # ==============================
 # DOCTOR AUTHENTICATION & REGISTRATION
+# NOTE: Doctors are created by admins only (via /admin/doctors endpoint)
 # ==============================
-
-@doctor_routes.route('/register', methods=['POST'])
-def doctor_register():
-    """Register a new doctor"""
-    data = request.get_json()
-
-    email = data.get('email')
-    password = data.get('password')
-    confirm_password = data.get('confirm_password')
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
-    license_number = data.get('license_number')
-    phone = data.get('phone')
-    hospital_name = data.get('hospital_name')
-
-    # Validate required fields
-    if not all([email, password, confirm_password, first_name, last_name,
-                license_number, phone, hospital_name]):
-        return jsonify({"message": "All fields required"}), 400
-
-    # Find or create hospital by name
-    hospital = Hospital.query.filter_by(name=hospital_name).first()
-    if not hospital:
-        # Create new hospital if it doesn't exist
-        hospital = Hospital(
-            name=hospital_name,
-            address="To be updated",
-            phone="To be updated",
-            city="To be updated",
-            state="To be updated"
-        )
-        db.session.add(hospital)
-        db.session.commit()
-
-    # Validate Kenyan phone number
-    if not validate_kenyan_phone(phone):
-        return jsonify({"message": "Invalid Kenyan phone number. Use format +254XXXXXXXXX or 07XXXXXXXX"}), 400
-
-    if password != confirm_password:
-        return jsonify({"message": "Passwords do not match"}), 400
-
-    if Doctor.query.filter_by(email=email).first():
-        return jsonify({"message": "Doctor already exists with this email"}), 400
-
-    if Doctor.query.filter_by(license_number=license_number).first():
-        return jsonify({"message": "License number already registered"}), 400
-
-    hashed_password = generate_password_hash(password)
-    new_doctor = Doctor(
-        email=email,
-        password=hashed_password,
-        first_name=first_name,
-        last_name=last_name,
-        specialization="Sickle Cell Doctor",  # Fixed specialization
-        license_number=license_number,
-        phone=phone,
-        hospital_id=hospital.id
-    )
-
-    db.session.add(new_doctor)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Doctor registered successfully",
-        "doctor_id": new_doctor.id
-    }), 201
-
-
-def validate_kenyan_phone(phone):
-    """Validate Kenyan phone number format"""
-    import re
-    # Accept +254XXXXXXXXX or 07XXXXXXXX format
-    pattern = r'^(\+254|0)(7|1|2)[0-9]{8}$'
-    return re.match(pattern, phone) is not None
-    return jsonify({"message": "Email and password required"}), 400
-
-    doctor = Doctor.query.filter_by(email=email).first()
-    if not doctor or not check_password_hash(doctor.password, password):
-        return jsonify({"message": "Invalid email or password"}), 401
-
-    return jsonify({
-        "message": f"Welcome Dr. {doctor.first_name}!",
-        "doctor_id": doctor.id,
-        "name": f"{doctor.first_name} {doctor.last_name}",
-        "specialization": doctor.specialization,
-        "hospital_id": doctor.hospital_id
-    }), 200
 
 
 # ==============================
@@ -190,22 +120,32 @@ def get_dashboard(doctor_id):
     patient_count = db.session.query(
         DoctorPatient).filter_by(doctor_id=doctor_id).count()
 
-    # Count appointments (pending)
-    pending_appointments = db.session.query(DoctorAppointment).filter_by(
-        doctor_id=doctor_id,
-        status='pending'
+    # Count appointments (pending, future only)
+    from datetime import datetime
+    now = datetime.now()
+    pending_appointments = db.session.query(DoctorAppointment).filter(
+        DoctorAppointment.doctor_id == doctor_id,
+        DoctorAppointment.status == 'pending',
+        DoctorAppointment.appointment_date >= now
     ).count()
 
-    # Count approved appointments
-    approved_appointments = db.session.query(DoctorAppointment).filter_by(
-        doctor_id=doctor_id,
-        status='approved'
+    # Count approved appointments (future only)
+    from datetime import datetime
+    now = datetime.now()
+    approved_appointments = db.session.query(DoctorAppointment).filter(
+        DoctorAppointment.doctor_id == doctor_id,
+        DoctorAppointment.status == 'approved',
+        DoctorAppointment.appointment_date >= now
     ).count()
+
+    from datetime import datetime
+    now = datetime.now()
 
     # Count active prescriptions
-    active_prescriptions = db.session.query(Prescription).filter_by(
-        doctor_id=doctor_id,
-        status='active'
+    active_prescriptions = db.session.query(Prescription).filter(
+        Prescription.doctor_id == doctor_id,
+        Prescription.status.notin_(['discontinued', 'completed']),
+        (Prescription.end_date.is_(None) | (Prescription.end_date > now))
     ).count()
 
     # Recent consultation notes (last 5)
@@ -214,7 +154,7 @@ def get_dashboard(doctor_id):
     ).order_by(ConsultationNote.created_at.desc()).limit(5).all()
 
     return jsonify({
-        "doctor_name": f"{doctor.first_name} {doctor.last_name}",
+        "doctor_name": doctor.name,
         "specialization": doctor.specialization,
         "hospital": doctor.hospital.name,
         "total_patients": patient_count,
@@ -242,16 +182,16 @@ def get_my_patients(doctor_id):
 
     patients_data = []
     for dp in doctor_patients.items:
-        patient = User.query.get(dp.patient_id)
+        patient = Patient.query.get(dp.patient_id)
         if not patient:
             continue
         medical_profile = MedicalProfile.query.filter_by(
-            user_id=dp.patient_id).first()
+            patient_id=dp.patient_id).first()
 
         # Get phone from latest appointment
         phone = None
         latest_appointment = Appointment.query.filter_by(
-            user_id=dp.patient_id).order_by(Appointment.id.desc()).first()
+            patient_id=dp.patient_id).order_by(Appointment.id.desc()).first()
         if latest_appointment:
             phone = latest_appointment.phone
 
@@ -286,17 +226,20 @@ def get_patient_details(doctor_id, patient_id):
     if not doctor_patient:
         return jsonify({"message": "Access denied. Patient not assigned to you"}), 403
 
-    patient = User.query.get(patient_id)
+    patient = Patient.query.get(patient_id)
     medical_profile = MedicalProfile.query.filter_by(
-        user_id=patient_id).first()
+        patient_id=patient_id).first()
 
-    # Get active prescriptions
-    prescriptions = Prescription.query.filter_by(
-        patient_id=patient_id,
-        status='active'
+    from datetime import datetime
+    now = datetime.now()
+
+    prescriptions = Prescription.query.filter(
+        Prescription.patient_id == patient_id,
+        Prescription.doctor_id == doctor_id,
+        Prescription.status.notin_(['discontinued', 'completed']),
+        (Prescription.end_date.is_(None) | (Prescription.end_date > now))
     ).all()
 
-    # Get consultation notes (last 10)
     notes = ConsultationNote.query.filter_by(
         patient_id=patient_id
     ).order_by(ConsultationNote.created_at.desc()).limit(10).all()
@@ -333,6 +276,7 @@ def get_patient_details(doctor_id, patient_id):
             "medication": p.medication_name,
             "dosage": p.dosage,
             "frequency": p.frequency,
+            "duration": p.duration,
             "start_date": p.start_date.isoformat()
         } for p in prescriptions],
         "recent_notes": [{
@@ -360,7 +304,7 @@ def get_patient_details(doctor_id, patient_id):
 @verify_doctor
 def search_patient(doctor_id, patient_id):
     """Quick search for patient (by name or ID)"""
-    # Verify doctor has access
+    # Verify doctor has access to this patient
     doctor_patient = DoctorPatient.query.filter_by(
         doctor_id=doctor_id,
         patient_id=patient_id
@@ -369,7 +313,7 @@ def search_patient(doctor_id, patient_id):
     if not doctor_patient:
         return jsonify({"message": "Access denied"}), 403
 
-    patient = User.query.get(patient_id)
+    patient = Patient.query.get(patient_id)
     return jsonify({
         "patient_id": patient.id,
         "name": patient.name,
@@ -401,9 +345,9 @@ def get_my_appointments(doctor_id):
 
         appointments_data = []
         for a in appointments:
-            patient = User.query.get(a.patient_id)
+            patient = Patient.query.get(a.patient_id)
             latest_appointment = Appointment.query.filter_by(
-                user_id=a.patient_id).order_by(Appointment.id.desc()).first()
+                patient_id=a.patient_id).order_by(Appointment.id.desc()).first()
             phone = latest_appointment.phone if latest_appointment else "N/A"
 
             appointments_data.append({
@@ -421,7 +365,7 @@ def get_my_appointments(doctor_id):
         }), 200
 
     except Exception as e:
-        # Return JSON error (CORS decorator still applies on response)
+
         return jsonify({"message": "Error fetching appointments", "details": str(e)}), 500
 
 
@@ -437,9 +381,8 @@ def approve_appointment(doctor_id, appointment_id):
     appointment.status = 'approved'
     appointment.updated_at = datetime.now()
 
-    # Mirror status into patient appointment record (if exists)
     patient_appointment = Appointment.query.filter_by(
-        user_id=appointment.patient_id,
+        patient_id=appointment.patient_id,
         doctor_id=appointment.doctor_id,
         preferred_date=appointment.appointment_date.date().isoformat(),
         preferred_time=appointment.appointment_date.strftime('%H:%M')
@@ -449,7 +392,6 @@ def approve_appointment(doctor_id, appointment_id):
         patient_appointment.notes = 'Approved by doctor'
         db.session.add(patient_appointment)
 
-    # Auto-add patient to doctor's patient list if not already there
     existing_assignment = DoctorPatient.query.filter_by(
         doctor_id=doctor_id,
         patient_id=appointment.patient_id
@@ -483,13 +425,12 @@ def decline_appointment(doctor_id, appointment_id):
     appointment.notes = reason or 'Declined by doctor'
     appointment.updated_at = datetime.now()
 
-    # Mirror status into patient appointment record (if exists)
     patient_appointment = Appointment.query.filter_by(
-        user_id=appointment.patient_id,
+        patient_id=appointment.patient_id,
         doctor_id=appointment.doctor_id,
         preferred_date=appointment.appointment_date.date().isoformat(),
         preferred_time=appointment.appointment_date.strftime('%H:%M')
-    ).first()
+    ).order_by(Appointment.id.desc()).first()
 
     if patient_appointment:
         patient_appointment.status = 'declined'
@@ -497,17 +438,17 @@ def decline_appointment(doctor_id, appointment_id):
         db.session.add(patient_appointment)
     else:
         # Create a corresponding patient appointment record for audit (declined)
-        patient = User.query.get(appointment.patient_id)
+        patient = Patient.query.get(appointment.patient_id)
         doctor = Doctor.query.get(appointment.doctor_id)
 
         if patient and doctor:
             new_appointment = Appointment(
-                user_id=appointment.patient_id,
+                patient_id=appointment.patient_id,
                 full_name=patient.name,
                 phone=patient.phone or "N/A",
                 email=patient.email,
-                hospital=doctor.hospital_name if doctor.hospital_name else "N/A",
-                doctor=f"{doctor.first_name} {doctor.last_name}",
+                hospital=doctor.hospital.name if doctor.hospital else "N/A",
+                doctor=doctor.name,
                 doctor_id=appointment.doctor_id,
                 preferred_date=appointment.appointment_date.date().isoformat(),
                 preferred_time=appointment.appointment_date.strftime('%H:%M'),
@@ -516,7 +457,6 @@ def decline_appointment(doctor_id, appointment_id):
             )
             db.session.add(new_appointment)
 
-    # If this doctor has no approved relationship with this patient, remove doctor-patient mapping
     approved_existing = DoctorAppointment.query.filter_by(
         doctor_id=doctor_id,
         patient_id=appointment.patient_id,
@@ -574,7 +514,10 @@ def create_prescription(doctor_id):
     medication_name = data.get('medication_name')
     dosage = data.get('dosage')
     frequency = data.get('frequency')
-    refill_date = data.get('refill_date')  # Patient can see refill date
+    prescription_type = data.get(
+        'prescription_type', 'long-term')  # short-term or long-term
+    end_date = data.get('end_date')  # For short-term
+    refill_date = data.get('refill_date')  # For long-term
     notes = data.get('notes', '')
 
     # Verify doctor has access to this patient
@@ -586,50 +529,61 @@ def create_prescription(doctor_id):
     if not doctor_patient:
         return jsonify({"message": "Patient not assigned to you"}), 403
 
-    if not all([medication_name, dosage, frequency, refill_date]):
-        return jsonify({"message": "All fields required"}), 400
+    if not all([medication_name, dosage, frequency]):
+        return jsonify({"message": "Medication name, dosage, and frequency are required"}), 400
 
-    # Validate refill date is not in the past
-    try:
-        from datetime import datetime as dt, date
-        refill_obj = dt.strptime(refill_date, "%Y-%m-%d").date()
-        if refill_obj < date.today():
-            return jsonify({"message": "Refill date cannot be in the past"}), 400
-    except ValueError:
-        return jsonify({"message": "Invalid refill date format"}), 400
+    # Validate based on prescription type
+    todayDate = datetime.now().date()
 
-    new_prescription = Prescription(
-        doctor_id=doctor_id,
-        patient_id=patient_id,
-        medication_name=medication_name,
-        dosage=dosage,
-        frequency=frequency,
-        duration=refill_date,  # Using as refill reference
-        notes=notes,
-        status='active'
-    )
+    if prescription_type == "short-term":
+        if not end_date:
+            return jsonify({"message": "End date is required for short-term prescriptions"}), 400
+        try:
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+            if end_date_obj < todayDate:
+                return jsonify({"message": "End date cannot be in the past"}), 400
+        except ValueError:
+            return jsonify({"message": "Invalid end date format"}), 400
+
+        new_prescription = Prescription(
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            medication_name=medication_name,
+            dosage=dosage,
+            frequency=frequency,
+            duration=f"Take until {end_date}",
+            end_date=datetime.strptime(end_date, "%Y-%m-%d"),
+            notes=notes,
+            status='active'
+        )
+    else:
+        # long-term prescription
+        if not refill_date:
+            return jsonify({"message": "Refill date is required for long-term prescriptions"}), 400
+        try:
+            refill_obj = datetime.strptime(refill_date, "%Y-%m-%d").date()
+            if refill_obj < todayDate:
+                return jsonify({"message": "Refill date cannot be in the past"}), 400
+        except ValueError:
+            return jsonify({"message": "Invalid refill date format"}), 400
+
+        new_prescription = Prescription(
+            doctor_id=doctor_id,
+            patient_id=patient_id,
+            medication_name=medication_name,
+            dosage=dosage,
+            frequency=frequency,
+            duration=f"Refill due {refill_date}",
+            refill_date=refill_date,
+            notes=notes,
+            status='active'
+        )
 
     db.session.add(new_prescription)
-    db.session.flush()
-
-    # Also create Medication record visible to patient
-    from models import Medication
-    medication_record = Medication(
-        user_id=patient_id,
-        doctor_id=doctor_id,
-        medication_name=medication_name,
-        dosage=dosage,
-        frequency=frequency,
-        refill_date=refill_date,
-        prescribed_by_doctor=True
-    )
-    db.session.add(medication_record)
-    print(
-        f"Created medication record for prescription {new_prescription.id}: {medication_name}, {dosage}, {frequency}")
     db.session.commit()
 
     return jsonify({
-        "message": "Prescription created and sent to patient",
+        "message": "Prescription created successfully",
         "prescription_id": new_prescription.id
     }), 201
 
@@ -649,6 +603,7 @@ def get_prescription(doctor_id, prescription_id):
         "dosage": prescription.dosage,
         "frequency": prescription.frequency,
         "duration": prescription.duration,
+        "refill_date": prescription.refill_date,
         "status": prescription.status,
         "start_date": prescription.start_date.isoformat(),
         "end_date": prescription.end_date.isoformat() if prescription.end_date else None,
@@ -668,18 +623,8 @@ def discontinue_prescription(doctor_id, prescription_id):
     # Mark prescription as discontinued
     prescription.status = 'discontinued'
     prescription.end_date = datetime.now()
-
-    # Also remove the corresponding Medication record from patient's view
-    from models import Medication
-    medication = Medication.query.filter_by(
-        user_id=prescription.patient_id,
-        medication_name=prescription.medication_name,
-        doctor_id=doctor_id,
-        prescribed_by_doctor=True
-    ).first()
-
-    if medication:
-        db.session.delete(medication)
+    if not prescription.notes or not prescription.notes.strip():
+        prescription.notes = 'Discontinued by doctor'
 
     db.session.commit()
 
@@ -699,9 +644,13 @@ def get_active_prescriptions(doctor_id, patient_id):
     if not doctor_patient:
         return jsonify({"message": "Access denied"}), 403
 
-    prescriptions = Prescription.query.filter_by(
-        patient_id=patient_id,
-        status='active'
+    from datetime import datetime
+    now = datetime.now()
+
+    prescriptions = Prescription.query.filter(
+        Prescription.patient_id == patient_id,
+        Prescription.status.notin_(['discontinued', 'completed']),
+        (Prescription.end_date.is_(None) | (Prescription.end_date > now))
     ).all()
 
     return jsonify({
@@ -710,6 +659,7 @@ def get_active_prescriptions(doctor_id, patient_id):
             "medication": p.medication_name,
             "dosage": p.dosage,
             "frequency": p.frequency,
+            "duration": p.duration,
             "start_date": p.start_date.isoformat()
         } for p in prescriptions]
     }), 200
@@ -811,42 +761,16 @@ def search_patients(doctor_id):
     doctor_patient_ids = [dp.patient_id for dp in doctor_patients]
 
     # Search within those patients
-    results = User.query.filter(
-        User.id.in_(doctor_patient_ids),
-        (User.name.ilike(f"%{query}%")) | (User.email.ilike(f"%{query}%"))
+    results = Patient.query.filter(
+        Patient.id.in_(doctor_patient_ids),
+        (Patient.name.ilike(f"%{query}%")) | (
+            Patient.email.ilike(f"%{query}%"))
     ).limit(10).all()
 
     return jsonify({
         "results": [{
-            "patient_id": u.id,
-            "name": u.name,
-            "email": u.email
-        } for u in results]
-    }), 200
-
-
-# ==============================
-# DOCTOR LOGIN
-# ==============================
-
-@doctor_routes.route('/login', methods=['POST'])
-def doctor_login():
-    """Login for doctors"""
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({"message": "Email and password required"}), 400
-
-    doctor = Doctor.query.filter_by(email=email).first()
-    if not doctor or not check_password_hash(doctor.password, password):
-        return jsonify({"message": "Invalid email or password"}), 401
-
-    return jsonify({
-        "message": f"Welcome Dr. {doctor.first_name}!",
-        "doctor_id": doctor.id,
-        "name": f"{doctor.first_name} {doctor.last_name}",
-        "specialization": doctor.specialization,
-        "hospital_id": doctor.hospital_id
+            "patient_id": patient.id,
+            "name": patient.name,
+            "email": patient.email
+        } for patient in results]
     }), 200

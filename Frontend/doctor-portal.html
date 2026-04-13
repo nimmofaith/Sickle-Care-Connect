@@ -13,7 +13,8 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <h1>Doctor Portal</h1>
+                <h1>Sickle Care Connect</h1>
+                <p>Doctor Portal</p>
             </div>
             <div class="nav-menu hidden" id="navMenu">
                 <a href="#" class="nav-link" data-section="dashboard">Dashboard</a>
@@ -53,32 +54,11 @@
             <div class="auth-container">
                 <div class="auth-card">
                     <h2>Doctor Registration</h2>
+                    <p><b style="color: rgb(78, 23, 23);">Note</b>: <em>Only pre-approved doctors can register.</em></p>
                     <form id="registerForm" onsubmit="handleDoctorRegister(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>First Name:</label>
-                                <input type="text" id="regFirstName" required placeholder="Enter first name">
-                            </div>
-                            <div class="form-group">
-                                <label>Last Name:</label>
-                                <input type="text" id="regLastName" required placeholder="Enter last name">
-                            </div>
-                        </div>
                         <div class="form-group">
-                            <label>Email:</label>
+                            <label style="margin-top: 20px;">Email:</label>
                             <input type="email" id="regEmail" required placeholder="doctor@hospital.com">
-                        </div>
-                        <div class="form-group">
-                            <label>License Number:</label>
-                            <input type="text" id="regLicenseNumber" required placeholder="License #">
-                        </div>
-                        <div class="form-group">
-                            <label>Phone:</label>
-                            <input type="tel" id="regPhone" required placeholder="enter phone number">
-                        </div>
-                        <div class="form-group">
-                            <label>Hospital:</label>
-                            <input type="text" id="regHospital" required placeholder="Enter hospital name">
                         </div>
                         <div class="form-group">
                             <label>Password:</label>
@@ -99,7 +79,7 @@
         <!-- Dashboard Section -->
         <div id="dashboardSection" class="section">
             <div class="dashboard-header">
-                <h2>Welcome,Dr. <span id="doctorName"></span></h2>
+                <h2>Welcome Dr. <span id="doctorName"></span></h2>
                 <p class="subtitle" id="doctorSubtitle"></p>
             </div>
 
@@ -172,10 +152,36 @@
                                 <label>Frequency:</label>
                                 <input type="text" id="rxFrequency" required placeholder="e.g., Twice daily">
                             </div>
+
+                            <!-- Prescription Type Selection -->
                             <div class="form-group">
-                                <label>Refill Date:</label>
-                                <input type="date" id="rxRefillDate" required>
+                                <label>Prescription Type:</label>
+                                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="prescriptionType" value="short-term" checked
+                                            onchange="togglePrescriptionDateField()">
+                                        <span style="margin-left: 8px;">Short-term (with end date)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; cursor: pointer;">
+                                        <input type="radio" name="prescriptionType" value="long-term"
+                                            onchange="togglePrescriptionDateField()">
+                                        <span style="margin-left: 8px;">Long-term (with refill date)</span>
+                                    </label>
+                                </div>
                             </div>
+
+                            <!-- Short-term: End Date -->
+                            <div class="form-group" id="endDateGroup">
+                                <label>End Date (Stop taking medication):</label>
+                                <input type="date" id="rxEndDate" required>
+                            </div>
+
+                            <!-- Long-term: Refill Date (hidden by default) -->
+                            <div class="form-group" id="refillDateGroup" style="display: none;">
+                                <label>Refill Date (Next refill):</label>
+                                <input type="date" id="rxRefillDate">
+                            </div>
+
                             <div class="form-group">
                                 <label>Notes:</label>
                                 <textarea id="rxNotes" placeholder="Additional notes..."></textarea>
@@ -195,6 +201,7 @@
                     <button class="filter-btn active" onclick="filterAppointments('pending', event)">Pending</button>
                     <button class="filter-btn" onclick="filterAppointments('approved', event)">Approved</button>
                     <button class="filter-btn" onclick="filterAppointments('cancelled', event)">Cancelled</button>
+                    <button class="filter-btn" onclick="filterAppointments('declined', event)">Declined</button>
                 </div>
             </div>
 
@@ -215,6 +222,7 @@
         </div>
     </div>
 
+    <script src="doctor-session.js"></script>
     <script src="doctor-script.js"></script>
 </body>
 
