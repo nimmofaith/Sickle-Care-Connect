@@ -17,7 +17,17 @@ except ImportError:
 app = Flask(__name__)
 CORS(app,
      resources={
-         r"/*": {"origins": ["http://127.0.0.1:5500", "http://localhost:5500"]}},
+         r"/*": {
+             "origins": [
+                 "http://127.0.0.1:5500",
+                 "http://localhost:5500",
+                 "http://127.0.0.1:3000",
+                 "http://localhost:3000",
+                 "https://sicklecareconnect.netlify.app",
+                 "https://sickle-care-connect.onrender.com"
+             ]
+         }
+     },
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-Doctor-ID"])
 

@@ -21,7 +21,7 @@ def verify_doctor(f):
     def decorated_function(*args, **kwargs):
         if request.method == 'OPTIONS':
             return jsonify({}), 200  # Allow preflight OPTIONS
-        
+
         token = extract_token_from_header()
         if not token:
             return jsonify({"message": "Authorization header required"}), 401
@@ -29,13 +29,13 @@ def verify_doctor(f):
         payload, error = verify_token(token)
         if error:
             return jsonify({"message": error}), 401
-        
+
         # Check if user type is doctor
         if payload.get('user_type') != 'doctor':
             return jsonify({"message": "Invalid credentials"}), 401
 
         return f(doctor_id=payload.get('user_id'), *args, **kwargs)
-    
+
     return decorated_function
 
 
@@ -43,38 +43,47 @@ def verify_doctor(f):
 # DOCTOR AUTHENTICATION
 # ==============================
 
-@doctor_routes.route('/login', methods=['POST'])
+@doctor_routes.route('/login', methods=['POST', 'OPTIONS'])
 def doctor_login():
     """Doctor login with email and password"""
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    if request.method == 'OPTIONS':
+        return ('', 204)
 
-    if not email or not password:
-        return jsonify({"message": "Email and password are required"}), 400
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({"message": "Invalid JSON payload"}), 400
 
-    doctor = Doctor.query.filter_by(email=email).first()
+        email = data.get("email", "").strip()
+        password = data.get("password", "")
 
-    if not doctor:
-        return jsonify({"message": "Doctor not found"}), 404
+        if not email or not password:
+            return jsonify({"message": "Email and password are required"}), 400
 
-    if not doctor.password:
-        return jsonify({"message": "Doctor account not registered. Please register using your email."}), 403
+        doctor = Doctor.query.filter_by(email=email).first()
 
-    if not check_password_hash(doctor.password, password):
-        return jsonify({"message": "Invalid email or password"}), 401
+        if not doctor:
+            return jsonify({"message": "Doctor not found"}), 404
 
-    # Generate JWT token
-    token = generate_token(doctor.id, 'doctor', doctor.email)
+        if not doctor.password:
+            return jsonify({"message": "Doctor account not registered. Please register using your email."}), 403
 
-    return jsonify({
-        "message": f"Welcome Dr. {doctor.name}!",
-        "doctor_id": doctor.id,
-        "doctor_name": doctor.name,
-        "specialization": doctor.specialization,
-        "hospital_id": doctor.hospital_id,
-        "token": token
-    }), 200
+        if not check_password_hash(doctor.password, password):
+            return jsonify({"message": "Invalid email or password"}), 401
+
+        # Generate JWT token
+        token = generate_token(doctor.id, 'doctor', doctor.email)
+
+        return jsonify({
+            "message": f"Welcome Dr. {doctor.name}!",
+            "doctor_id": doctor.id,
+            "doctor_name": doctor.name,
+            "specialization": doctor.specialization,
+            "hospital_id": doctor.hospital_id,
+            "token": token
+        }), 200
+    except Exception as e:
+        return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 
 # ==============================

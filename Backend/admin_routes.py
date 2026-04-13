@@ -11,11 +11,12 @@ admin_routes = Blueprint("admin_routes", __name__, url_prefix="/admin")
 # Authentication Middleware
 # ------------------------------
 
+
 def require_admin():
     """Middleware to check if user is admin using JWT"""
     if request.method == 'OPTIONS':
         return None, jsonify({}), 200  # Allow preflight CORS requests
-    
+
     token = extract_token_from_header()
     if not token:
         return None, jsonify({"message": "Authorization header required"}), 401
@@ -23,39 +24,55 @@ def require_admin():
     payload, error = verify_token(token)
     if error:
         return None, jsonify({"message": error}), 401
-    
+
     # Check if user type is admin
     if payload.get('user_type') != 'admin':
         return None, jsonify({"message": "Invalid credentials or insufficient permissions"}), 401
-    
+
     # Fetch the admin from database to return as user object
     admin = Admin.query.get(payload.get('user_id'))
     if not admin:
         return None, jsonify({"message": "Admin not found"}), 401
-    
+
     return admin, None, None
 
 # ------------------------------
 # Admin Login
 # ------------------------------
 
-@admin_routes.route("/login", methods=["POST"])
+
+@admin_routes.route("/login", methods=["POST", "OPTIONS"])
 def admin_login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    if request.method == 'OPTIONS':
+        return ('', 204)
 
-    admin = Admin.query.filter_by(email=email).first()
-    if not admin or not check_password_hash(admin.password, password):
-        return jsonify({"message": "Invalid admin credentials"}), 401
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({"message": "Invalid JSON payload"}), 400
 
-    # Generate JWT token
-    token = generate_token(admin.id, 'admin', admin.email)
-    return jsonify({
-        "message": f"Welcome Admin {admin.name}!",
-        "user_id": admin.id,
-        "token": token
-    }), 200
+        email = data.get("email", "").strip()
+        password = data.get("password", "")
+
+        if not email or not password:
+            return jsonify({"message": "Email and password are required"}), 400
+
+        admin = Admin.query.filter_by(email=email).first()
+        if not admin:
+            return jsonify({"message": "Invalid admin credentials"}), 401
+
+        if not admin.password or not check_password_hash(admin.password, password):
+            return jsonify({"message": "Invalid admin credentials"}), 401
+
+        # Generate JWT token
+        token = generate_token(admin.id, 'admin', admin.email)
+        return jsonify({
+            "message": f"Welcome Admin {admin.name}!",
+            "user_id": admin.id,
+            "token": token
+        }), 200
+    except Exception as e:
+        return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 # ------------------------------
 # Dashboard Stats

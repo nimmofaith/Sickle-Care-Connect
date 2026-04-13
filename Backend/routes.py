@@ -138,27 +138,39 @@ def signup():
 # Login route
 
 
-@routes.route("/login", methods=["POST"])
+@routes.route("/login", methods=["POST", "OPTIONS"])
 def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    if request.method == 'OPTIONS':
+        return ('', 204)
 
-    user = Patient.query.filter_by(email=email).first()
-    if not user:
-        return jsonify({"message": "User does not exist"}), 404
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({"message": "Invalid JSON payload"}), 400
 
-    if not check_password_hash(user.password, password):
-        return jsonify({"message": "Invalid email or password"}), 401
+        email = data.get("email", "").strip()
+        password = data.get("password", "")
 
-    # Generate JWT token
-    token = generate_token(user.id, 'patient', user.email)
+        if not email or not password:
+            return jsonify({"message": "Email and password are required"}), 400
 
-    return jsonify({
-        "message": f"Welcome {user.name}!",
-        "patient_id": user.id,
-        "token": token
-    }), 200
+        user = Patient.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"message": "Invalid email or password"}), 401
+
+        if not check_password_hash(user.password, password):
+            return jsonify({"message": "Invalid email or password"}), 401
+
+        # Generate JWT token
+        token = generate_token(user.id, 'patient', user.email)
+
+        return jsonify({
+            "message": f"Welcome {user.name}!",
+            "patient_id": user.id,
+            "token": token
+        }), 200
+    except Exception as e:
+        return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 
 @routes.route("/doctor/register", methods=["POST"])
