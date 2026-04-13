@@ -41,7 +41,7 @@ appointmentForm.addEventListener("submit", async (e) => {
             headers.Authorization = `Bearer ${authToken}`;
         }
 
-        const res = await fetch("http://127.0.0.1:5000/appointments", {
+        const res = await fetch("https://sickle-care-connect.onrender.com/appointments", {
             method: "POST",
             headers,
             body: JSON.stringify({

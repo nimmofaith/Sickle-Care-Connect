@@ -58,7 +58,7 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
 async function autoCompletePastAppointments() {
     if (!user.id) return;
     try {
-        await fetch(`http://127.0.0.1:5000/appointments/complete-past/${user.id}`, {
+        await fetch(`https://sickle-care-connect.onrender.com/appointments/complete-past/${user.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ async function loadDashboard() {
         await autoCompletePastAppointments();
 
         // Load past appointments for last checkup
-        const pastRes = await fetch(`http://127.0.0.1:5000/appointments/past/${user.id}`, {
+        const pastRes = await fetch(`https://sickle-care-connect.onrender.com/appointments/past/${user.id}`, {
             headers: {
                 ...getAuthHeaders()
             }
@@ -191,7 +191,7 @@ function getInstructionDisplay(prescription) {
 // ===============================
 async function loadMedications() {
     try {
-        const res = await fetch(`http://127.0.0.1:5000/prescriptions/${user.id}`, {
+        const res = await fetch(`https://sickle-care-connect.onrender.com/prescriptions/${user.id}`, {
             headers: {
                 ...getAuthHeaders()
             }
@@ -278,7 +278,7 @@ async function loadMedications() {
 // ===============================
 async function loadAppointments() {
     try {
-        const res = await fetch(`http://127.0.0.1:5000/appointments/upcoming/${user.id}`, {
+        const res = await fetch(`https://sickle-care-connect.onrender.com/appointments/upcoming/${user.id}`, {
             headers: {
                 ...getAuthHeaders()
             }
@@ -373,7 +373,7 @@ async function cancelAppointment(id) {
     if (!confirm("Are you sure you want to cancel this appointment?")) return;
 
     try {
-        const res = await fetch(`http://127.0.0.1:5000/appointments`, {
+        const res = await fetch(`https://sickle-care-connect.onrender.com/appointments`, {
             method: "DELETE",
             headers: {
                 'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ async function loadProfile() {
     if (!profileDisplayGuard) return;
 
     try {
-        const res = await fetch(`http://127.0.0.1:5000/profile/${user.id}`, {
+        const res = await fetch(`https://sickle-care-connect.onrender.com/profile/${user.id}`, {
             headers: {
                 ...getAuthHeaders()
             }
@@ -444,7 +444,7 @@ if (profileForm) {
         console.log("Sending profile data:", data);
 
         try {
-            const res = await fetch('http://127.0.0.1:5000/profile', {
+            const res = await fetch('https://sickle-care-connect.onrender.com/profile', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -31,7 +31,7 @@ signupForm.addEventListener("submit", async (e) => {
     }
 
     try {
-        const res = await fetch("http://127.0.0.1:5000/signup", {
+        const res = await fetch("https://sickle-care-connect.onrender.com/signup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password, confirm_password: confirmPassword })
@@ -42,7 +42,7 @@ signupForm.addEventListener("submit", async (e) => {
         if (res.ok) {
             // Clear any old user's profile data from localStorage
             localStorage.removeItem('patient_id');
-            
+
             // Clear all profile data for any patient
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
@@ -52,7 +52,7 @@ signupForm.addEventListener("submit", async (e) => {
                 }
             }
             keysToRemove.forEach(key => localStorage.removeItem(key));
-            
+
             showAlert("Signup successful! Redirecting...", 'success');
             window.location.replace("login.html");
         } else {
