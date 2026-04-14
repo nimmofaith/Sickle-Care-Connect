@@ -32,7 +32,13 @@ CORS(app,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With", "X-Doctor-ID"])
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(BASE_DIR, "sicklecare.db")}'
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'sicklecare.db')}"
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # JWT Configuration
