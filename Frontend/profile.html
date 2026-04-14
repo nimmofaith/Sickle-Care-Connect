@@ -174,7 +174,7 @@
 
         async function loadMedicalProfile() {
             try {
-                const res = await fetch(`http://127.0.0.1:5000/profile/${patientId}`, {
+                const res = await fetch(`https://sickle-care-connect.onrender.com/profile/${patientId}`, {
                     headers: {
                         ...getAuthHeaders()
                     }
@@ -267,7 +267,7 @@
 
             // Save medical to backend
             try {
-                const res = await fetch('http://127.0.0.1:5000/profile', {
+                const res = await fetch('https://sickle-care-connect.onrender.com/profile', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -313,7 +313,7 @@
             }
 
             try {
-                const res = await fetch('http://127.0.0.1:5000/profile/password', {
+                const res = await fetch('https://sickle-care-connect.onrender.com/profile/password', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',

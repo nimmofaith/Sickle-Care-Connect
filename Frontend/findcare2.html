@@ -79,7 +79,7 @@
         hospitalList.innerHTML = '<div class="loading">Loading hospitals...</div>';
 
         try {
-          const response = await fetch(`http://localhost:5000/hospitals?search=${encodeURIComponent(search)}`);
+          const response = await fetch(`https://sickle-care-connect.onrender.com/hospitals?search=${encodeURIComponent(search)}`);
           const hospitals = await response.json();
 
           hospitalList.innerHTML = '';
