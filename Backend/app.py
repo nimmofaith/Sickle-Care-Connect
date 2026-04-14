@@ -65,6 +65,22 @@ def internal_error(error):
 with app.app_context():
     db.create_all()
 
+    admin_name = os.getenv("ADMIN_NAME")
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+
+    if admin_name and admin_email and admin_password:
+        existing_admin = Admin.query.filter_by(email=admin_email).first()
+        if not existing_admin:
+            hashed_password = generate_password_hash(admin_password)
+            admin_user = Admin(
+                name=admin_name, email=admin_email, password=hashed_password)
+            db.session.add(admin_user)
+            db.session.commit()
+            print("Admin auto-created securely")
+    else:
+        print("Admin environment variables not set")
+
     inspector = inspect(db.engine)
 
     # Check and add missing columns to appointment table
@@ -132,16 +148,6 @@ with app.app_context():
 @app.route("/")
 def home():
     return {"message": "Welcome to Sickle Care Connect API"}
-
-
-@app.route("/create-admin-temp")
-def create_admin_temp():
-    hashed_password = generate_password_hash("boss123")
-    admin_user = Admin(
-        name="bossadmin", email="boss@sicklecare.com", password=hashed_password)
-    db.session.add(admin_user)
-    db.session.commit()
-    return jsonify({"message": "Admin created successfully"})
 
 
 if __name__ == '__main__':
