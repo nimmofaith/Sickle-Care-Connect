@@ -14,11 +14,11 @@
 
 <body>
     <script>
-        ensurePatientSession('sign in.html');
+        ensurePatientSession('login.html');
         const patientId = localStorage.getItem('patient_id');
         if (!patientId) {
             alert("You must be logged in to access this page");
-            window.location.href = "sign in.html";
+            window.location.href = "login.html";
         }
     </script>
     <header class="navbar">

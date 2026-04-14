@@ -48,7 +48,7 @@ const profileDisplayGuard = document.getElementById('nameDisplay');
 document.getElementById('logoutBtn')?.addEventListener('click', () => {
     localStorage.removeItem("patient_id");
     localStorage.removeItem("patient_token");
-    window.location.href = 'sign in.html';
+    window.location.href = 'login.html';
 });
 
 
