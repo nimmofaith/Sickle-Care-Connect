@@ -62,7 +62,7 @@ function ensurePatientSession(redirectTo = 'login.html') {
 
 function logoutPatient() {
     clearPatientSession();
-    window.location.href = 'sign in.html';
+    window.location.href = 'login.html';
 }
 
 // Apply session enforcement when patient-protected pages load.
