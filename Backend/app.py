@@ -37,9 +37,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
+    # Convert postgres:// to postgresql:// for SQLAlchemy compatibility
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASE_DIR, 'sicklecare.db')}"
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///sicklecare.db"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
