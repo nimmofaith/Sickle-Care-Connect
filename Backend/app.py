@@ -7,6 +7,8 @@ from flask_cors import CORS
 from db import db
 from sqlalchemy import inspect, text
 from datetime import datetime
+from werkzeug.security import generate_password_hash
+from models import Admin
 
 try:
     from dotenv import load_dotenv
@@ -130,6 +132,16 @@ with app.app_context():
 @app.route("/")
 def home():
     return {"message": "Welcome to Sickle Care Connect API"}
+
+
+@app.route("/create-admin-temp")
+def create_admin_temp():
+    hashed_password = generate_password_hash("boss123")
+    admin_user = Admin(
+        name="bossadmin", email="boss@sicklecare.com", password=hashed_password)
+    db.session.add(admin_user)
+    db.session.commit()
+    return jsonify({"message": "Admin created successfully"})
 
 
 if __name__ == '__main__':
