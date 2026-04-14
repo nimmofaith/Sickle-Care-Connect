@@ -35,3 +35,4 @@ urllib3==2.6.3
 Werkzeug==3.1.6
 zope.event==6.1
 zope.interface==8.2
+psycopg2-binary==2.9.10
