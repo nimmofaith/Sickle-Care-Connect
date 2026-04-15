@@ -468,7 +468,6 @@ def get_appointments():
         "preferred_date": a.preferred_date,
         "preferred_time": a.preferred_time,
         "status": a.status,
-        "notes": a.notes,
         "status_report": a.status_report or ''
     } for a in appointments]
 

@@ -637,7 +637,7 @@ function createAppointmentsTable(appointments) {
                     <th>Date</th>
                     <th>Time</th>
                     <th>Status</th>
-                    <th>Notes</th>
+                    <th>Report</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -654,7 +654,7 @@ function createAppointmentsTable(appointments) {
                 <td>${appointment.preferred_date}</td>
                 <td>${appointment.preferred_time}</td>
                 <td><span class="status-badge ${statusClass}">${appointment.status}</span></td>
-                <td>${appointment.notes || ''}</td>
+                <td>${appointment.status_report || ''}</td>
                 <td>
                     <button class="btn-secondary" onclick="updateAppointmentStatus(${appointment.id}, '${appointment.status}')">Update Status</button>
                 </td>
@@ -786,6 +786,7 @@ function createPrescriptionsTable(prescriptions) {
                     <th>Instruction</th>
                     <th>Status</th>
                     <th>Notes</th>
+                    <th>Report</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -819,6 +820,7 @@ function createPrescriptionsTable(prescriptions) {
                 <td>${instructionHtml}</td>
                 <td><span class="status-badge ${statusClass}">${capitalizeFirst(computedStatus)}</span></td>
                 <td>${prescription.notes || ''}</td>
+                <td>${prescription.status_report || ''}</td>
                 <td>
                     <button class="btn-secondary" onclick="updatePrescriptionStatus(${prescription.id}, '${prescription.status}')">Change Status</button>
                 </td>
