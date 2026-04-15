@@ -67,8 +67,8 @@ appointmentForm.addEventListener("submit", async (e) => {
         }
 
         alert(data.message);
-
         appointmentForm.reset();
+        window.location.href = 'dashboard.html';
     } catch (err) {
         console.error("ERROR:", err);
         alert("Failed to book appointment");
