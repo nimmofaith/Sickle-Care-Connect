@@ -5,7 +5,7 @@ from admin_routes import admin_routes
 from flask import Flask, jsonify
 from flask_cors import CORS
 from db import db
-from sqlalchemy import inspect, text
+from sqlalchemy import text
 from datetime import datetime
 from werkzeug.security import generate_password_hash
 from models import Admin
@@ -130,50 +130,6 @@ with app.app_context():
             print("DEBUG: Admin already exists, skipping creation")
     else:
         print("DEBUG: Admin environment variables not set")
-
-    inspector = inspect(db.engine)
-
-    # Check and add missing columns to appointment table
-    appointment_cols = [c['name']
-                        for c in inspector.get_columns('appointment')]
-
-    if 'notes' not in appointment_cols:
-        db.session.execute(
-            text('ALTER TABLE appointment ADD COLUMN notes TEXT'))
-
-    if 'status' not in appointment_cols:
-        db.session.execute(
-            text("ALTER TABLE appointment ADD COLUMN status VARCHAR(50) DEFAULT 'pending'"))
-
-    # Check and add missing created_at columns to other tables (SQLite compatible)
-    tables_to_check = ['patient', 'doctor', 'prescription',
-                       'hospital', 'medical_profile', 'consultation_note']
-
-    for table_name in tables_to_check:
-        try:
-            table_cols = [c['name'] for c in inspector.get_columns(table_name)]
-            if 'created_at' not in table_cols:
-                # Add column without default for SQLite compatibility
-                db.session.execute(
-                    text(f'ALTER TABLE {table_name} ADD COLUMN created_at DATETIME'))
-                # Update existing rows with current timestamp
-                db.session.execute(
-                    text(f"UPDATE {table_name} SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL"))
-                print(f"Added created_at column to {table_name} table")
-        except Exception as e:
-            print(f"Column {table_name}.created_at: {e}")
-
-    try:
-        prescription_cols = [c['name']
-                             for c in inspector.get_columns('prescription')]
-        if 'refill_date' not in prescription_cols:
-            db.session.execute(
-                text('ALTER TABLE prescription ADD COLUMN refill_date VARCHAR(50)'))
-            print("Added refill_date column to prescription table")
-    except Exception as e:
-        print(f"Column prescription.refill_date: {e}")
-
-    db.session.commit()
 
     # Clean up past canceled appointments
     from models import Appointment, DoctorAppointment

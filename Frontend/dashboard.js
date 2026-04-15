@@ -15,6 +15,18 @@ function getAuthHeaders() {
     return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+// Helper function to handle API responses and check for 401 errors
+async function handleApiResponse(response) {
+    if (response.status === 401) {
+        console.error("DEBUG: Received 401 Unauthorized - token may be expired or invalid");
+        clearPatientSession();
+        alert('Your session has expired. Please log in again.');
+        window.location.href = 'login.html';
+        throw new Error('Unauthorized - redirecting to login');
+    }
+    return response;
+}
+
 function getHiddenRescheduleAppointments() {
     try {
         const raw = localStorage.getItem('hidden_reschedule_appointments');
@@ -58,15 +70,18 @@ document.getElementById('logoutBtn')?.addEventListener('click', () => {
 async function autoCompletePastAppointments() {
     if (!user.id) return;
     try {
-        await fetch(`https://sickle-care-connect.onrender.com/appointments/complete-past/${user.id}`, {
+        const res = await fetch(`https://sickle-care-connect.onrender.com/appointments/complete-past/${user.id}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             }
         });
+        await handleApiResponse(res);
     } catch (err) {
-        console.error("Error auto-completing past appointments:", err);
+        if (!err.message.includes('Unauthorized')) {
+            console.error("Error auto-completing past appointments:", err);
+        }
     }
 }
 
@@ -97,6 +112,9 @@ async function loadDashboard() {
                 ...getAuthHeaders()
             }
         });
+
+        await handleApiResponse(pastRes);
+
         if (pastRes.ok) {
             const pastData = await pastRes.json();
             if (pastData.length > 0) {
@@ -110,8 +128,10 @@ async function loadDashboard() {
 
         // Med count and next appointment are updated in their respective functions
     } catch (err) {
-        console.error("Dashboard error:", err);
-        showAlert("Unable to load dashboard data.", 'error');
+        if (!err.message.includes('Unauthorized')) {
+            console.error("Dashboard error:", err);
+            showAlert("Unable to load dashboard data.", 'error');
+        }
     }
 }
 

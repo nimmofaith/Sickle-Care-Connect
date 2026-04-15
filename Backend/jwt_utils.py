@@ -54,12 +54,17 @@ def verify_token(token):
     """
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        print(
+            f"DEBUG: Token verified successfully for user: {payload.get('user_id')}")
         return payload, None
     except jwt.ExpiredSignatureError:
+        print(f"DEBUG: Token has expired")
         return None, "Token has expired"
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        print(f"DEBUG: Invalid token error: {str(e)}")
         return None, "Invalid token"
     except Exception as e:
+        print(f"DEBUG: Token verification failed: {str(e)}")
         return None, f"Token verification failed: {str(e)}"
 
 

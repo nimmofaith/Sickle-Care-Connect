@@ -138,6 +138,32 @@ def signup():
 # Login route
 
 
+@routes.route("/health", methods=["GET"])
+def health_check():
+    """Health check endpoint for debugging"""
+    try:
+        # Test database connectivity
+        db.session.execute(text('SELECT 1'))
+        patient_count = Patient.query.count()
+        admin_count = Admin.query.count()
+        doctor_count = Doctor.query.count()
+
+        return jsonify({
+            "status": "healthy",
+            "database": "connected",
+            "patients": patient_count,
+            "admins": admin_count,
+            "doctors": doctor_count
+        }), 200
+    except Exception as e:
+        print(f"DEBUG: Health check failed: {str(e)}")
+        return jsonify({
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e)
+        }), 500
+
+
 @routes.route("/login", methods=["POST", "OPTIONS"])
 def login():
     if request.method == 'OPTIONS':
@@ -146,23 +172,40 @@ def login():
     try:
         data = request.get_json(silent=True)
         if not isinstance(data, dict):
+            print(f"DEBUG: Invalid JSON payload received")
             return jsonify({"message": "Invalid JSON payload"}), 400
 
         email = data.get("email", "").strip()
         password = data.get("password", "")
 
         if not email or not password:
+            print(f"DEBUG: Missing email or password")
             return jsonify({"message": "Email and password are required"}), 400
 
+        print(f"DEBUG: Login attempt for email: {email}")
+
+        # Query user
         user = Patient.query.filter_by(email=email).first()
         if not user:
+            print(f"DEBUG: User not found for email: {email}")
+            print(
+                f"DEBUG: Total patients in database: {Patient.query.count()}")
             return jsonify({"message": "Invalid email or password"}), 401
 
-        if not check_password_hash(user.password, password):
+        print(f"DEBUG: User found: {user.name} (ID: {user.id})")
+
+        # Check password
+        password_matches = check_password_hash(user.password, password)
+        print(f"DEBUG: Password verification result: {password_matches}")
+
+        if not password_matches:
+            print(f"DEBUG: Password mismatch for user: {email}")
             return jsonify({"message": "Invalid email or password"}), 401
 
         # Generate JWT token
+        print(f"DEBUG: Generating token for user: {user.id}")
         token = generate_token(user.id, 'patient', user.email)
+        print(f"DEBUG: Token generated successfully")
 
         return jsonify({
             "message": f"Welcome {user.name}!",
@@ -170,6 +213,9 @@ def login():
             "token": token
         }), 200
     except Exception as e:
+        print(f"DEBUG: Login error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"message": f"Server error: {str(e)}"}), 500
 
 

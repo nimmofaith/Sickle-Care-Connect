@@ -1,29 +1,38 @@
 from db import db
+from sqlalchemy.sql import func
 
 # ------------------------------
 # Admin Model
 # ------------------------------
+
+
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
 # ------------------------------
-# Patient Model 
+# Patient Model
 # ------------------------------
+
+
 class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     appointments = db.relationship("Appointment", backref="patient", lazy=True)
 
 # ------------------------------
 # Appointment Model
 # ==============================
+
 
 class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -40,6 +49,8 @@ class Appointment(db.Model):
     # pending, approved, declined, cancelled
     status = db.Column(db.String(50), default='pending')
     notes = db.Column(db.String(300), nullable=True)
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     patient_id = db.Column(db.Integer, db.ForeignKey(
         "patient.id"), nullable=False)
@@ -61,6 +72,8 @@ class Medication(db.Model):
     refill_date = db.Column(db.String(50))
     prescribed_by_doctor = db.Column(
         db.Boolean, default=False)  # Track if doctor-prescribed
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
 
 # ------------------------------
@@ -74,6 +87,8 @@ class MedicalProfile(db.Model):
     blood_type = db.Column(db.String(50))
     allergies = db.Column(db.String(200))
     complications = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
 
 # ==============================
@@ -87,10 +102,11 @@ class Hospital(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False, unique=True)
     city = db.Column(db.String(100), nullable=False)
-    location = db.Column(db.String(300), nullable=False)  
+    location = db.Column(db.String(300), nullable=False)
     service = db.Column(db.String(200), nullable=False)
     notes = db.Column(db.String(300), nullable=True)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     doctors = db.relationship("Doctor", backref="hospital", lazy=True)
 
@@ -101,14 +117,15 @@ class Hospital(db.Model):
 class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)  
+    name = db.Column(db.String(100), nullable=False)
     # nullable for pre-registration
     password = db.Column(db.String(200), nullable=True)
     specialization = db.Column(db.String(100), nullable=False)
     license_number = db.Column(db.String(50), unique=True, nullable=False)
     hospital_id = db.Column(db.Integer, db.ForeignKey(
         'hospital.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     # Relationships
     doctor_patients = db.relationship(
@@ -131,7 +148,8 @@ class DoctorPatient(db.Model):
         'doctor.id'), nullable=False)
     patient_id = db.Column(
         db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    assigned_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    assigned_date = db.Column(db.DateTime(
+        timezone=True), server_default=func.now())
 
     # Unique constraint: each doctor can only be assigned to a patient once
     __table_args__ = (db.UniqueConstraint(
@@ -154,15 +172,16 @@ class DoctorAppointment(db.Model):
     status = db.Column(db.String(50), default='pending')
     reason = db.Column(db.String(300))
     notes = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(
-    ), onupdate=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now(), onupdate=func.now())
 
     patient = db.relationship("Patient", backref="doctor_appointments")
 
 
 # ------------------------------
-# Prescription Model 
+# Prescription Model
 # ------------------------------
 class Prescription(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -178,12 +197,14 @@ class Prescription(db.Model):
     duration = db.Column(db.String(100), nullable=True)
     # Optional refill date
     refill_date = db.Column(db.String(50), nullable=True)
-    start_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    start_date = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
     end_date = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.Text)
     # active, completed, discontinued
     status = db.Column(db.String(50), default='active')
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     patient = db.relationship("Patient", backref="prescriptions")
 
@@ -197,11 +218,13 @@ class ConsultationNote(db.Model):
         'doctor.id'), nullable=False)
     patient_id = db.Column(
         db.Integer, db.ForeignKey('patient.id'), nullable=False)
-    visit_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    visit_date = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
     observations = db.Column(db.Text, nullable=False)
     treatment_plan = db.Column(db.Text)
     pain_level = db.Column(db.Integer)  # 1-10 scale
     physical_exam_notes = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime(timezone=True),
+                           server_default=func.now())
 
     patient = db.relationship("Patient", backref="consultation_notes")
