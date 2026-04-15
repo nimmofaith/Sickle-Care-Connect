@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from flask import Blueprint, request, jsonify
 from db import db
+from sqlalchemy import text
 from models import Admin, Patient, Appointment, Medication, MedicalProfile, Doctor, DoctorPatient, DoctorAppointment, Hospital, Prescription
 from werkzeug.security import generate_password_hash, check_password_hash
 from jwt_utils import generate_token, verify_token, extract_token_from_header
