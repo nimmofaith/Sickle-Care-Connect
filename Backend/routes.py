@@ -326,6 +326,8 @@ def create_appointment():
         if pref_date_obj < today:
             return jsonify({"message": "Preferred appointment date cannot be in the past"}), 400
 
+        notes = data.get('notes')
+
         new_appointment = Appointment(
             patient_id=int(patient_id),
             full_name=full_name.strip(),
@@ -335,7 +337,8 @@ def create_appointment():
             doctor=doctor.strip(),
             preferred_date=preferred_date,
             preferred_time=preferred_time,
-            status='pending'
+            status='pending',
+            notes=notes.strip() if notes else None
         )
 
         db.session.add(new_appointment)
@@ -402,7 +405,8 @@ def get_appointments(patient_id):
             "preferred_date": a.preferred_date,
             "preferred_time": a.preferred_time,
             "status": a.status,
-            "notes": a.notes if hasattr(a, 'notes') else ""
+            "notes": a.notes or "",
+            "status_report": getattr(a, 'status_report', '') or ""
         }
         for a in appointments
     ]
@@ -429,7 +433,7 @@ def cancel_appointment():
         return jsonify({"message": "Unauthorized access"}), 403
 
     appointment.status = 'cancelled'
-    appointment.notes = 'Cancelled by patient'
+    appointment.status_report = 'Cancelled by patient'
     db.session.add(appointment)
 
     if appointment.doctor_id:
@@ -510,7 +514,7 @@ def complete_past_approved_appointments(patient_id):
 
     for appt in past_approved:
         appt.status = 'completed'
-        appt.notes = appt.notes or 'Marked complete after appointment date'
+        appt.status_report = appt.status_report or 'Marked complete after appointment date'
         db.session.add(appt)
         if appt.doctor_id:
             from datetime import datetime as dt, timedelta
@@ -581,7 +585,8 @@ def get_upcoming(patient_id):
             "preferred_date": a.preferred_date,
             "preferred_time": a.preferred_time,
             "status": status,
-            "notes": notes
+            "notes": notes,
+            "status_report": a.status_report or ''
         })
 
     return jsonify(result)
@@ -612,7 +617,8 @@ def get_past(patient_id):
             "hospital": a.hospital,
             "doctor": a.doctor,
             "preferred_date": a.preferred_date,
-            "preferred_time": a.preferred_time
+            "preferred_time": a.preferred_time,
+            "status_report": getattr(a, 'status_report', '') or ''
         }
         for a in appointments
     ])

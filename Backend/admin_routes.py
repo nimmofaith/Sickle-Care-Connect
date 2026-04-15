@@ -468,7 +468,8 @@ def get_appointments():
         "preferred_date": a.preferred_date,
         "preferred_time": a.preferred_time,
         "status": a.status,
-        "notes": a.notes
+        "notes": a.notes,
+        "status_report": a.status_report or ''
     } for a in appointments]
 
     return jsonify(result), 200
@@ -501,7 +502,7 @@ def update_appointment_status(appointment_id):
         notes = default_notes.get(new_status, notes)
 
     appointment.status = new_status
-    appointment.notes = notes
+    appointment.status_report = notes
 
     # Update corresponding doctor appointment if exists
     if appointment.doctor_id:
@@ -529,7 +530,7 @@ def update_appointment_status(appointment_id):
 
             if best_match:
                 best_match.status = new_status
-                best_match.notes = notes
+                best_match.status_report = notes
         except Exception as e:
             pass  # If matching fails, continue without updating doctor appointment
     else:
@@ -547,7 +548,7 @@ def update_appointment_status(appointment_id):
                 # Within 1 hour
                 if da.appointment_date and abs((da.appointment_date - apt_datetime).total_seconds()) < 3600:
                     da.status = new_status
-                    da.notes = notes
+                    da.status_report = notes
                     break
         except:
             pass
@@ -591,7 +592,8 @@ def get_prescriptions():
         "start_date": p.start_date.isoformat() if p.start_date else None,
         "end_date": p.end_date.isoformat() if p.end_date else None,
         "status": p.status,
-        "notes": p.notes or ''
+        "notes": p.notes or '',
+        "status_report": p.status_report or ''
     } for p in prescriptions]
 
     return jsonify(result), 200
@@ -622,7 +624,7 @@ def update_prescription_status(prescription_id):
         notes = default_notes.get(new_status, notes)
 
     prescription.status = new_status
-    prescription.notes = notes
+    prescription.status_report = notes
     db.session.commit()
 
     return jsonify({"message": f"Prescription status updated to {new_status}"}), 200

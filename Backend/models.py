@@ -49,6 +49,7 @@ class Appointment(db.Model):
     # pending, approved, declined, cancelled
     status = db.Column(db.String(50), default='pending')
     notes = db.Column(db.String(300), nullable=True)
+    status_report = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now())
 
@@ -172,6 +173,7 @@ class DoctorAppointment(db.Model):
     status = db.Column(db.String(50), default='pending')
     reason = db.Column(db.String(300))
     notes = db.Column(db.Text)
+    status_report = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True),
                            server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True),
@@ -201,6 +203,7 @@ class Prescription(db.Model):
                            server_default=func.now())
     end_date = db.Column(db.DateTime, nullable=True)
     notes = db.Column(db.Text)
+    status_report = db.Column(db.String(300), nullable=True)
     # active, completed, discontinued
     status = db.Column(db.String(50), default='active')
     created_at = db.Column(db.DateTime(timezone=True),

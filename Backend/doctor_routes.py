@@ -298,13 +298,15 @@ def get_patient_details(doctor_id, patient_id):
             "id": apt.id,
             "date": apt.appointment_date.isoformat(),
             "status": apt.status,
-            "notes": apt.notes
+            "notes": apt.notes,
+            "status_report": apt.status_report or ''
         } for apt in previous_appointments],
         "upcoming_appointments": [{
             "id": apt.id,
             "date": apt.appointment_date.isoformat(),
             "status": apt.status,
-            "notes": apt.notes
+            "notes": apt.notes,
+            "status_report": apt.status_report or ''
         } for apt in upcoming_appointments]
     }), 200
 
@@ -366,7 +368,8 @@ def get_my_appointments(doctor_id):
                 "patient_phone": phone,
                 "appointment_date": a.appointment_date.isoformat() if a.appointment_date else None,
                 "status": a.status,
-                "notes": a.notes or ""
+                "notes": a.notes or "",
+                "status_report": a.status_report or ""
             })
 
         return jsonify({
@@ -398,7 +401,7 @@ def approve_appointment(doctor_id, appointment_id):
     ).first()
     if patient_appointment:
         patient_appointment.status = 'approved'
-        patient_appointment.notes = 'Approved by doctor'
+        patient_appointment.status_report = 'Approved by doctor'
         db.session.add(patient_appointment)
 
     existing_assignment = DoctorPatient.query.filter_by(
@@ -443,7 +446,7 @@ def decline_appointment(doctor_id, appointment_id):
 
     if patient_appointment:
         patient_appointment.status = 'declined'
-        patient_appointment.notes = reason or 'Declined by doctor'
+        patient_appointment.status_report = reason or 'Declined by doctor'
         db.session.add(patient_appointment)
     else:
         # Create a corresponding patient appointment record for audit (declined)
@@ -462,7 +465,7 @@ def decline_appointment(doctor_id, appointment_id):
                 preferred_date=appointment.appointment_date.date().isoformat(),
                 preferred_time=appointment.appointment_date.strftime('%H:%M'),
                 status='declined',
-                notes=reason or 'Declined by doctor'
+                status_report=reason or 'Declined by doctor'
             )
             db.session.add(new_appointment)
 
@@ -616,7 +619,8 @@ def get_prescription(doctor_id, prescription_id):
         "status": prescription.status,
         "start_date": prescription.start_date.isoformat(),
         "end_date": prescription.end_date.isoformat() if prescription.end_date else None,
-        "notes": prescription.notes
+        "notes": prescription.notes,
+        "status_report": prescription.status_report or ''
     }), 200
 
 
@@ -632,8 +636,7 @@ def discontinue_prescription(doctor_id, prescription_id):
     # Mark prescription as discontinued
     prescription.status = 'discontinued'
     prescription.end_date = datetime.now()
-    if not prescription.notes or not prescription.notes.strip():
-        prescription.notes = 'Discontinued by doctor'
+    prescription.status_report = 'Discontinued by doctor'
 
     db.session.commit()
 
@@ -669,7 +672,8 @@ def get_active_prescriptions(doctor_id, patient_id):
             "dosage": p.dosage,
             "frequency": p.frequency,
             "duration": p.duration,
-            "start_date": p.start_date.isoformat()
+            "start_date": p.start_date.isoformat(),
+            "status_report": p.status_report or ''
         } for p in prescriptions]
     }), 200
 
