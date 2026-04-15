@@ -446,7 +446,7 @@ def decline_appointment(doctor_id, appointment_id):
 
     if patient_appointment:
         patient_appointment.status = 'declined'
-        patient_appointment.status_report = reason or 'Declined by doctor'
+        patient_appointment.status_report = 'Declined by doctor'
         db.session.add(patient_appointment)
     else:
         # Create a corresponding patient appointment record for audit (declined)
@@ -465,7 +465,7 @@ def decline_appointment(doctor_id, appointment_id):
                 preferred_date=appointment.appointment_date.date().isoformat(),
                 preferred_time=appointment.appointment_date.strftime('%H:%M'),
                 status='declined',
-                status_report=reason or 'Declined by doctor'
+                status_report='Declined by doctor'
             )
             db.session.add(new_appointment)
 
