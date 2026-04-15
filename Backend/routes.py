@@ -1,7 +1,6 @@
 from datetime import date, datetime
 from flask import Blueprint, request, jsonify
 from db import db
-from sqlalchemy import inspect, text
 from models import Admin, Patient, Appointment, Medication, MedicalProfile, Doctor, DoctorPatient, DoctorAppointment, Hospital, Prescription
 from werkzeug.security import generate_password_hash, check_password_hash
 from jwt_utils import generate_token, verify_token, extract_token_from_header
@@ -11,15 +10,6 @@ routes = Blueprint("routes", __name__)
 # ------------------------------
 # User Routes
 # ------------------------------
-
-
-def ensure_appointment_notes_column():
-    inspector = inspect(db.engine)
-    cols = [c['name'] for c in inspector.get_columns('appointment')]
-    if 'notes' not in cols:
-        db.session.execute(
-            text('ALTER TABLE appointment ADD COLUMN notes TEXT'))
-        db.session.commit()
 
 
 def validate_password(password):
@@ -286,7 +276,6 @@ def get_all_users():
 def create_appointment():
     if request.method == 'OPTIONS':
         return ('', 204)
-    ensure_appointment_notes_column()
     patient, error, status = require_patient()
     if error:
         return error, status
