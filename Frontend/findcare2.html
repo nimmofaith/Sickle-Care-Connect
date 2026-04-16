@@ -67,7 +67,6 @@
 
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search hospitals...">
-      <button onclick="searchHospital()">Search</button>
     </div>
 
     <div id="hospitalList">
@@ -93,7 +92,9 @@
             const card = document.createElement('div');
             card.className = 'hospital-card';
 
-            const doctorsText = hospital.doctors.length > 0 ? hospital.doctors.join(', ') : 'No doctors assigned';
+            const doctorsHtml = hospital.doctors.length > 0
+              ? hospital.doctors.map(doc => `<div><strong>Doctor:</strong> ${doc.name} (${doc.specialization})</div>`).join('')
+              : '<div><strong>Doctor:</strong> No doctors assigned</div>';
 
             card.innerHTML = `
               <h2><i class="fa-solid fa-hospital icon"></i>${hospital.name}</h2>
@@ -101,8 +102,8 @@
               <p><strong>Location:</strong> ${hospital.location}</p>
               <p><strong>Service:</strong> ${hospital.service}</p>
               <p><strong>Notes:</strong> ${hospital.notes || ''}</p>
-              <p><strong>Doctor:</strong> ${doctorsText}</p>
-              <a href="book appointment.html?hospital=${encodeURIComponent(hospital.name)}&doctor=${encodeURIComponent(hospital.doctors[0] || '')}&doctor_id=${hospital.first_doctor_id || ''}" class="booking">Book Appointment</a>
+              ${doctorsHtml}
+              <a href="book appointment.html?hospital=${encodeURIComponent(hospital.name)}&doctor=${encodeURIComponent(hospital.doctors[0]?.name || '')}&doctor_id=${hospital.first_doctor_id || ''}" class="booking">Book Appointment</a>
             `;
 
             hospitalList.appendChild(card);
@@ -121,6 +122,10 @@
       // Load hospitals on page load
       document.addEventListener('DOMContentLoaded', function () {
         loadHospitals();
+        // Add live search
+        document.getElementById("searchInput").addEventListener('input', function () {
+          searchHospital();
+        });
       });
     </script>
     <script src="navigation.js"></script>

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from flask import Blueprint, request, jsonify
 from db import db
-from sqlalchemy import text
+from sqlalchemy import text, or_
 from models import Admin, Patient, Appointment, Medication, MedicalProfile, Doctor, DoctorPatient, DoctorAppointment, Hospital, Prescription
 from werkzeug.security import generate_password_hash, check_password_hash
 from jwt_utils import generate_token, verify_token, extract_token_from_header
@@ -679,12 +679,18 @@ def clear_all_appointments(patient_id):
 def get_public_hospitals():
     """Get all hospitals for public access (find care page)"""
     search = request.args.get('search', '')
-    hospitals = Hospital.query.filter(
-        Hospital.name.contains(search) |
-        Hospital.city.contains(search) |
-        Hospital.location.contains(search) |
-        Hospital.service.contains(search)
-    ).all()
+    if search:
+        hospitals = Hospital.query.join(Doctor).filter(
+            or_(
+                Hospital.name.ilike(f'%{search}%'),
+                Hospital.city.ilike(f'%{search}%'),
+                Hospital.location.ilike(f'%{search}%'),
+                Hospital.service.ilike(f'%{search}%'),
+                Doctor.specialization.ilike(f'%{search}%')
+            )
+        ).distinct().all()
+    else:
+        hospitals = Hospital.query.all()
 
     result = []
     for h in hospitals:
@@ -693,7 +699,10 @@ def get_public_hospitals():
         doctor_list = []
         first_doctor_id = None
         for d in doctors:
-            doctor_list.append(f"Dr. {d.name}")
+            doctor_list.append({
+                "name": f"Dr. {d.name}",
+                "specialization": d.specialization
+            })
             if not first_doctor_id:
                 first_doctor_id = d.id
 
