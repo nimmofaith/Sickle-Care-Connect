@@ -30,6 +30,10 @@ signupForm.addEventListener("submit", async (e) => {
         return;
     }
 
+    // Show loading spinner
+    const spinner = document.getElementById("signupSpinner");
+    spinner.style.display = "block";
+
     try {
         const res = await fetch("https://sickle-care-connect.onrender.com/signup", {
             method: "POST",
@@ -61,5 +65,8 @@ signupForm.addEventListener("submit", async (e) => {
     } catch (error) {
         console.error("Signup error:", error);
         showAlert("Server unavailable. Please try again later.", 'error');
+    } finally {
+        // Hide loading spinner
+        spinner.style.display = "none";
     }
 });

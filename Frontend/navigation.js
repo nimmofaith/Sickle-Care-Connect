@@ -17,19 +17,19 @@ function updateNavigation() {
     const authElement = navLinks.querySelector('.auth-btn') || navLinks.querySelector('li:last-child');
 
     if (userId) {
-        // User is logged in
-        const dashboardLink = document.createElement('li');
-        dashboardLink.innerHTML = '<a href="dashboard.html" class="link">Dashboard</a>';
+        // User is logged in - show consistent navigation: Home → About → Find Care → Dashboard
 
-        // Replace login button with dashboard and logout
+        // Replace login button with logout
         if (authElement) {
             authElement.innerHTML = '<button id="logoutBtn" class="btn">Logout</button>';
         }
 
-        // Add dashboard link if not already present
+        // Add Dashboard link before logout if not already present
         const existingDashboard = navLinks.querySelector('a[href="dashboard.html"]');
         if (!existingDashboard) {
-            // Insert dashboard link before the last item (logout)
+            const dashboardLink = document.createElement('li');
+            dashboardLink.innerHTML = '<a href="dashboard.html" class="link">Dashboard</a>';
+            // Insert before the logout button (authElement)
             navLinks.insertBefore(dashboardLink, authElement);
         }
 

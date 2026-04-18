@@ -34,6 +34,10 @@ loginForm.addEventListener("submit", async (e) => {
         return;
     }
 
+    // Show loading spinner
+    const spinner = document.getElementById("loginSpinner");
+    spinner.style.display = "block";
+
     try {
         const res = await fetch("https://sickle-care-connect.onrender.com/login", {
             method: "POST",
@@ -61,5 +65,8 @@ loginForm.addEventListener("submit", async (e) => {
     } catch (error) {
         console.error(error);
         showAlert("Server error. Please try again later.", 'error');
+    } finally {
+        // Hide loading spinner
+        spinner.style.display = "none";
     }
 });

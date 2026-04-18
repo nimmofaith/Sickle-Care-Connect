@@ -22,6 +22,10 @@ async function handleLogin(e) {
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
 
+    // Show loading spinner
+    const spinner = document.getElementById("adminLoginSpinner");
+    spinner.style.display = "block";
+
     try {
         const response = await fetch(`${API_BASE}/admin/login`, {
             method: 'POST',
@@ -51,6 +55,9 @@ async function handleLogin(e) {
         // Re-enable button
         loginBtn.disabled = false;
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+
+        // Hide loading spinner
+        spinner.style.display = "none";
     }
 }
 

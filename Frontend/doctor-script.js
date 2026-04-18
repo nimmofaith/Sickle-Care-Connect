@@ -209,6 +209,10 @@ async function handleDoctorLogin(event) {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
 
+    // Show loading spinner
+    const spinner = document.getElementById("doctorLoginSpinner");
+    spinner.style.display = "block";
+
     try {
         const response = await fetch(`${API_BASE}/doctor/login`, {
             method: "POST",
@@ -238,6 +242,9 @@ async function handleDoctorLogin(event) {
     } catch (error) {
         console.error("Login error:", error);
         showAlert("Login error: " + error.message, "error");
+    } finally {
+        // Hide loading spinner
+        spinner.style.display = "none";
     }
 }
 
@@ -253,6 +260,10 @@ async function handleDoctorRegister(event) {
         showAlert("Passwords do not match", "error");
         return;
     }
+
+    // Show loading spinner
+    const spinner = document.getElementById("doctorRegisterSpinner");
+    spinner.style.display = "block";
 
     const formData = {
         email: email,
@@ -279,6 +290,9 @@ async function handleDoctorRegister(event) {
     } catch (error) {
         console.error("Registration error:", error);
         showAlert("Registration error: " + error.message, "error");
+    } finally {
+        // Hide loading spinner
+        spinner.style.display = "none";
     }
 }
 

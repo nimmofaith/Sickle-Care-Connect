@@ -32,6 +32,10 @@ appointmentForm.addEventListener("submit", async (e) => {
         preferred_time
     });
 
+    // Show loading spinner
+    const spinner = document.getElementById("appointmentSpinner");
+    spinner.style.display = "block";
+
     try {
         const authToken = localStorage.getItem('patient_token');
         const headers = {
@@ -72,5 +76,8 @@ appointmentForm.addEventListener("submit", async (e) => {
     } catch (err) {
         console.error("ERROR:", err);
         alert("Failed to book appointment");
+    } finally {
+        // Hide loading spinner
+        spinner.style.display = "none";
     }
 });
