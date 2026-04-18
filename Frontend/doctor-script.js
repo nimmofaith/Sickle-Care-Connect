@@ -158,6 +158,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    const patientSearchInput = document.getElementById('patientSearch');
+    if (patientSearchInput) {
+        patientSearchInput.addEventListener('input', debounce(searchPatients, 250));
+    }
 });
 
 async function verifyAuthentication(storedDoctorId) {
