@@ -458,22 +458,37 @@ button {
     padding: 10px;
     background: #f9f9f9;
     border-radius: 4px;
-    border-left: 4px solid #28a745;
+    border-left: 4px solid #286ea7;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.doctor-details {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
 }
 
 .doctor-info .booking {
     display: inline-block;
-    margin-top: 5px;
+    margin-top: 0;
     padding: 5px 10px;
-    background: #28a745;
+    background: #286ea7;
     color: white;
     text-decoration: none;
     border-radius: 4px;
     font-size: 12px;
+    white-space: nowrap;
 }
 
 .doctor-info .booking:hover {
-    background: #218838;
+    background: #268eb7;
 }
 
 /* Featured hospital */

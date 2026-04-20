@@ -35,10 +35,6 @@ signupForm.addEventListener("submit", async (e) => {
     signupBtn.disabled = true;
     signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing up...';
 
-    // Show loading spinner
-    const spinner = document.getElementById("signupSpinner");
-    spinner.style.display = "block";
-
     try {
         const res = await fetch("https://sickle-care-connect.onrender.com/signup", {
             method: "POST",
@@ -74,8 +70,5 @@ signupForm.addEventListener("submit", async (e) => {
         // Re-enable button and reset text
         signupBtn.disabled = false;
         signupBtn.innerHTML = 'Sign Up';
-
-        // Hide loading spinner
-        spinner.style.display = "none";
     }
 });

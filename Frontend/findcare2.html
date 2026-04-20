@@ -95,7 +95,7 @@
             const doctorsHtml = hospital.doctors.length > 0
               ? hospital.doctors.map(doc => `
                   <div class="doctor-info">
-                    <strong>Doctor:</strong> ${doc.name} (${doc.specialization})
+                    <div class="doctor-details"><strong>Doctor:</strong> ${doc.name} (${doc.specialization})</div>
                     <a href="book appointment.html?hospital=${encodeURIComponent(hospital.name)}&doctor=${encodeURIComponent(doc.name)}&doctor_id=${doc.id}" class="booking">Book Appointment</a>
                   </div>
                 `).join('')

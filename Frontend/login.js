@@ -39,10 +39,6 @@ loginForm.addEventListener("submit", async (e) => {
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
 
-    // Show loading spinner
-    const spinner = document.getElementById("loginSpinner");
-    spinner.style.display = "block";
-
     try {
         const res = await fetch("https://sickle-care-connect.onrender.com/login", {
             method: "POST",
@@ -74,8 +70,5 @@ loginForm.addEventListener("submit", async (e) => {
         // Re-enable button and reset text
         loginBtn.disabled = false;
         loginBtn.innerHTML = 'Login';
-
-        // Hide loading spinner
-        spinner.style.display = "none";
     }
 });
