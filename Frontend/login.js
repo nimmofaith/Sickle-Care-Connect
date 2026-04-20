@@ -28,11 +28,16 @@ loginForm.addEventListener("submit", async (e) => {
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    const loginBtn = document.getElementById("loginBtn");
 
     if (!email || !password) {
         showAlert("Please fill in all fields", 'error');
         return;
     }
+
+    // Disable button and show loading
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
 
     // Show loading spinner
     const spinner = document.getElementById("loginSpinner");
@@ -66,6 +71,10 @@ loginForm.addEventListener("submit", async (e) => {
         console.error(error);
         showAlert("Server error. Please try again later.", 'error');
     } finally {
+        // Re-enable button and reset text
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Login';
+
         // Hide loading spinner
         spinner.style.display = "none";
     }

@@ -452,6 +452,30 @@ button {
     color: #282727;
 }
 
+/* Doctor info within hospital card */
+.doctor-info {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    border-left: 4px solid #28a745;
+}
+
+.doctor-info .booking {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 5px 10px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.doctor-info .booking:hover {
+    background: #218838;
+}
+
 /* Featured hospital */
 .icon {
     color: #007BFF;

@@ -213,6 +213,11 @@ async function handleDoctorLogin(event) {
 
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
+    const loginBtn = document.getElementById("doctorLoginBtn");
+
+    // Disable button and show loading
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
 
     // Show loading spinner
     const spinner = document.getElementById("doctorLoginSpinner");
@@ -248,6 +253,10 @@ async function handleDoctorLogin(event) {
         console.error("Login error:", error);
         showAlert("Login error: " + error.message, "error");
     } finally {
+        // Re-enable button and reset text
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Login';
+
         // Hide loading spinner
         spinner.style.display = "none";
     }
@@ -259,12 +268,17 @@ async function handleDoctorRegister(event) {
     const email = document.getElementById("regEmail").value;
     const password = document.getElementById("regPassword").value;
     const confirmPassword = document.getElementById("regConfirmPassword").value;
+    const registerBtn = document.getElementById("doctorRegisterBtn");
 
     // Check if passwords match
     if (password !== confirmPassword) {
         showAlert("Passwords do not match", "error");
         return;
     }
+
+    // Disable button and show loading
+    registerBtn.disabled = true;
+    registerBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
 
     // Show loading spinner
     const spinner = document.getElementById("doctorRegisterSpinner");
@@ -296,6 +310,10 @@ async function handleDoctorRegister(event) {
         console.error("Registration error:", error);
         showAlert("Registration error: " + error.message, "error");
     } finally {
+        // Re-enable button and reset text
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = 'Register';
+
         // Hide loading spinner
         spinner.style.display = "none";
     }

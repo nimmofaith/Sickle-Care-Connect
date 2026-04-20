@@ -19,6 +19,7 @@ signupForm.addEventListener("submit", async (e) => {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
+    const signupBtn = document.getElementById("signupBtn");
 
     if (!name || !email || !password || !confirmPassword) {
         showAlert("Please fill in all fields", 'error');
@@ -29,6 +30,10 @@ signupForm.addEventListener("submit", async (e) => {
         showAlert("Passwords do not match", 'error');
         return;
     }
+
+    // Disable button and show loading
+    signupBtn.disabled = true;
+    signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing up...';
 
     // Show loading spinner
     const spinner = document.getElementById("signupSpinner");
@@ -66,6 +71,10 @@ signupForm.addEventListener("submit", async (e) => {
         console.error("Signup error:", error);
         showAlert("Server unavailable. Please try again later.", 'error');
     } finally {
+        // Re-enable button and reset text
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = 'Sign Up';
+
         // Hide loading spinner
         spinner.style.display = "none";
     }

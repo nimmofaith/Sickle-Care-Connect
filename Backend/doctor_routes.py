@@ -40,6 +40,33 @@ def verify_doctor(f):
 
 
 # ==============================
+# Helper function to complete past approved appointments
+# ==============================
+def complete_past_doctor_appointments(doctor_id=None):
+    """Mark past approved appointments as completed for a specific doctor or all"""
+    try:
+        now = datetime.now()
+        query = DoctorAppointment.query.filter(
+            DoctorAppointment.status == 'approved',
+            DoctorAppointment.appointment_date < now
+        )
+        if doctor_id:
+            query = query.filter(DoctorAppointment.doctor_id == doctor_id)
+        
+        past_appointments = query.all()
+        for appt in past_appointments:
+            appt.status = 'completed'
+            appt.status_report = appt.status_report or 'Automatically marked completed after appointment date'
+            db.session.add(appt)
+        
+        if past_appointments:
+            db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error completing past appointments: {str(e)}")
+
+
+# ==============================
 # DOCTOR AUTHENTICATION
 # ==============================
 
@@ -341,6 +368,9 @@ def search_patient(doctor_id, patient_id):
 def get_my_appointments(doctor_id):
     """Get all appointments for this doctor with optional filters"""
     try:
+        # Complete past approved appointments automatically
+        complete_past_doctor_appointments(doctor_id)
+        
         # pending, approved, declined, cancelled
         status_filter = request.args.get('status')
         limit = request.args.get('limit', 20, type=int)

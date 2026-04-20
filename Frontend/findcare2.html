@@ -93,7 +93,12 @@
             card.className = 'hospital-card';
 
             const doctorsHtml = hospital.doctors.length > 0
-              ? hospital.doctors.map(doc => `<div><strong>Doctor:</strong> ${doc.name} (${doc.specialization})</div>`).join('')
+              ? hospital.doctors.map(doc => `
+                  <div class="doctor-info">
+                    <strong>Doctor:</strong> ${doc.name} (${doc.specialization})
+                    <a href="book appointment.html?hospital=${encodeURIComponent(hospital.name)}&doctor=${encodeURIComponent(doc.name)}&doctor_id=${doc.id}" class="booking">Book Appointment</a>
+                  </div>
+                `).join('')
               : '<div><strong>Doctor:</strong> No doctors assigned</div>';
 
             card.innerHTML = `
@@ -103,7 +108,6 @@
               <p><strong>Service:</strong> ${hospital.service}</p>
               <p><strong>Notes:</strong> ${hospital.notes || ''}</p>
               ${doctorsHtml}
-              <a href="book appointment.html?hospital=${encodeURIComponent(hospital.name)}&doctor=${encodeURIComponent(hospital.doctors[0]?.name || '')}&doctor_id=${hospital.first_doctor_id || ''}" class="booking">Book Appointment</a>
             `;
 
             hospitalList.appendChild(card);

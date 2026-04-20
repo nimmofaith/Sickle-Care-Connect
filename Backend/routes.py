@@ -700,6 +700,7 @@ def get_public_hospitals():
         first_doctor_id = None
         for d in doctors:
             doctor_list.append({
+                "id": d.id,
                 "name": f"Dr. {d.name}",
                 "specialization": d.specialization
             })
